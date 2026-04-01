@@ -58,5 +58,5 @@ def get_conversations(user_id: str, limit: int = 20):
             .execute()
         return result.data
     except Exception as e:
-        print(f"Get conversations error: {e}")
+        print(f"Get conversations error:- {e}")
         return []
