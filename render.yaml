@@ -3,11 +3,11 @@ services:
     name: dhme-studio-api
     runtime: python
     rootDir: backend
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    pythonVersion: "3.11.9"
+    buildCommand: "pip install --upgrade pip && pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
       - key: GEMINI_API_KEY
         sync: false
       - key: GROQ_API_KEY
@@ -21,9 +21,8 @@ services:
       - key: SUPABASE_KEY
         sync: false
       - key: APP_SECRET
-        sync: false
+        value: dhme_studio_secret_2024
       - key: ADMIN_INVITE_CODE
-        sync: false
+        value: dhme_admin_2024
       - key: ALLOWED_ORIGINS
-        sync: false
-    healthCheckPath: /health
+        value: "*"
