@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: dhme-studio-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: HUGGINGFACE_TOKEN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: APP_SECRET
+        sync: false
+      - key: ADMIN_INVITE_CODE
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+    healthCheckPath: /health
