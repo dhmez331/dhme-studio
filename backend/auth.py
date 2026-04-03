@@ -24,7 +24,7 @@ def get_valid_codes() -> dict:
     كودات الدعوة — Admin يعدّلها من .env
     Format: CODE:username:is_admin
     """
-    admin_code = os.getenv("ADMIN_INVITE_CODE", "dhme_admin_2024")
+    admin_code = os.getenv("ADMIN_INVITE_CODE", "dhme_admin_2026")
     
     # كودات ثابتة للعائلة والأصدقاء — تُضاف هنا
     codes = {
