@@ -37,7 +37,6 @@
 <div id="login-page" class="login-page" style="display:none;">
   <div class="login-card">
     <div class="login-logo">
-      <!-- Logo placeholder — تضيف الصورة هنا -->
       <div style="font-size:3rem;">🧠</div>
       <h1>Dhme Studio</h1>
       <p>دحمي استوديو — منصة الذكاء الاصطناعي</p>
@@ -75,7 +74,6 @@
 
   <!-- ── Sidebar (Desktop) ───────────────────────── -->
   <aside class="sidebar" id="sidebar">
-    <!-- Logo -->
     <div class="sidebar-logo">
       <div style="font-size:1.6rem;">🧠</div>
       <div>
@@ -84,7 +82,6 @@
       </div>
     </div>
 
-    <!-- Navigation -->
     <nav class="sidebar-nav">
       <div class="nav-item active" onclick="App.navigate('home')" data-page="home">
         <span class="nav-icon">🏠</span>
@@ -120,13 +117,13 @@
       </div>
     </nav>
 
-    <!-- Footer -->
     <div class="sidebar-footer">
       <div class="nav-item" onclick="App.navigate('settings')" data-page="settings">
         <span class="nav-icon">⚙️</span>
         <span class="nav-label">الإعدادات</span>
       </div>
-      <div class="nav-item" id="admin-nav-item" onclick="App.navigate('admin')" data-page="admin" style="display:none;">
+      <div class="nav-item" id="admin-nav-item" onclick="App.navigate('admin')"
+        data-page="admin" style="display:none;">
         <span class="nav-icon">👑</span>
         <span class="nav-label">لوحة الإدارة</span>
       </div>
@@ -166,18 +163,14 @@
   <!-- ── Main Content ────────────────────────────── -->
   <main class="main-content" id="main-content">
 
-    <!-- Toast Container -->
     <div id="toast-container"></div>
 
-    <!-- ── HOME PAGE ─────────────────────────────── -->
+    <!-- HOME -->
     <div id="page-home" class="home-page">
       <div class="home-header">
-        <h1 class="home-greeting gradient-text" id="home-greeting">
-          أهلاً 👋
-        </h1>
+        <h1 class="home-greeting gradient-text" id="home-greeting">أهلاً 👋</h1>
         <p class="home-subtitle">وش تبي تسوي اليوم؟</p>
       </div>
-
       <div class="tools-grid">
         <div class="tool-card" onclick="App.navigate('chat')">
           <div class="tool-icon">💬</div>
@@ -212,12 +205,11 @@
       </div>
     </div>
 
-    <!-- ── CHAT PAGE ──────────────────────────────── -->
+    <!-- CHAT -->
     <div id="page-chat" class="chat-page" style="display:none;">
       <div class="chat-header">
         <h2 class="chat-title">💬 المحادثة الذكية</h2>
         <div class="chat-controls">
-          <!-- Model Selector -->
           <select id="chat-model" class="input" style="width:auto; padding:8px 12px;">
             <option value="gemini_flash">Gemini 2.0 Flash</option>
             <option value="gemini_pro">Gemini 1.5 Pro</option>
@@ -227,32 +219,22 @@
             <option value="groq_deepseek">DeepSeek R1</option>
             <option value="groq_qwen">Qwen QwQ 32B</option>
           </select>
-
-          <!-- Collaboration Toggle -->
           <div class="collab-toggle">
             <div class="collab-option active" onclick="Chat.setCollab(null, this)">فردي</div>
             <div class="collab-option" onclick="Chat.setCollab('compete', this)">منافسة</div>
             <div class="collab-option" onclick="Chat.setCollab('collaborate', this)">تعاون</div>
           </div>
-
-          <!-- Search Toggle -->
           <button class="btn btn-secondary btn-icon" id="search-toggle"
             onclick="Chat.toggleSearch()" title="بحث في الإنترنت">🔍</button>
-
-          <!-- Clear -->
-          <button class="btn btn-ghost btn-icon" onclick="Chat.clear()" title="محادثة جديدة">🗑️</button>
+          <button class="btn btn-ghost btn-icon" onclick="Chat.clear()">🗑️</button>
         </div>
       </div>
-
-      <!-- Messages -->
       <div class="chat-messages" id="chat-messages">
         <div class="empty-state">
           <div class="empty-state-icon">💬</div>
           <div class="empty-state-text">ابدأ محادثتك الآن</div>
         </div>
       </div>
-
-      <!-- Input -->
       <div class="chat-input-area">
         <div class="chat-input-wrapper">
           <textarea class="chat-input" id="chat-input"
@@ -266,22 +248,19 @@
       </div>
     </div>
 
-    <!-- ── IMAGE PAGE ─────────────────────────────── -->
+    <!-- IMAGE -->
     <div id="page-image" class="image-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">🖼️ توليد الصور</h2>
         <p class="page-subtitle">حوّل كلماتك لصور احترافية</p>
       </div>
-
       <div class="image-controls">
         <div class="form-group">
           <label class="form-label">وصف الصورة</label>
           <textarea id="image-prompt" class="input" rows="3"
             placeholder="صف الصورة اللي تبيها..."></textarea>
         </div>
-
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-          <!-- Model -->
           <div class="form-group" style="flex:1; min-width:160px;">
             <label class="form-label">النموذج</label>
             <select id="image-model" class="input" style="padding:10px 12px;">
@@ -290,8 +269,6 @@
               <option value="sdxl">Stable Diffusion XL</option>
             </select>
           </div>
-
-          <!-- Mode -->
           <div class="form-group" style="flex:1; min-width:160px;">
             <label class="form-label">الوضع</label>
             <div class="collab-toggle">
@@ -300,13 +277,11 @@
               <div class="collab-option" onclick="ImageGen.setMode('collaborate', this)">تعاون</div>
             </div>
           </div>
-
           <button class="btn btn-primary" onclick="ImageGen.generate()" id="image-gen-btn">
             <span>توليد</span> <span>✨</span>
           </button>
         </div>
       </div>
-
       <div id="image-results" class="image-results">
         <div class="empty-state" style="grid-column:1/-1;">
           <div class="empty-state-icon">🖼️</div>
@@ -315,14 +290,12 @@
       </div>
     </div>
 
-    <!-- ── VOICE PAGE ─────────────────────────────── -->
+    <!-- VOICE -->
     <div id="page-voice" class="voice-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">🎤 الصوت والتحويل</h2>
         <p class="page-subtitle">نص لصوت + تفريغ صوتي</p>
       </div>
-
-      <!-- TTS -->
       <div class="tts-card">
         <h3 style="margin-bottom:16px; font-size:1rem;">🔊 نص إلى صوت</h3>
         <div class="form-group" style="margin-bottom:12px;">
@@ -342,19 +315,15 @@
         </div>
         <audio id="tts-audio" class="audio-player" controls style="display:none;"></audio>
       </div>
-
-      <!-- STT -->
       <div class="voice-recorder">
         <h3 style="font-size:1rem;">🎙️ تفريغ الصوت إلى نص</h3>
         <button class="record-btn" id="record-btn" onclick="Voice.toggleRecord()">🎤</button>
-        <p id="record-status" style="color:var(--text-muted); font-size:0.9rem;">
-          اضغط للتسجيل
-        </p>
+        <p id="record-status" style="color:var(--text-muted); font-size:0.9rem;">اضغط للتسجيل</p>
         <div id="transcription-result" class="analysis-result" style="display:none; width:100%;"></div>
       </div>
     </div>
 
-    <!-- ── VIDEO PAGE ─────────────────────────────── -->
+    <!-- VIDEO -->
     <div id="page-video" class="image-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">🎬 توليد الفيديو</h2>
@@ -369,13 +338,12 @@
       </div>
     </div>
 
-    <!-- ── ANALYZE PAGE ───────────────────────────── -->
+    <!-- ANALYZE -->
     <div id="page-analyze" class="analyze-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">🔍 تحليل الملفات</h2>
         <p class="page-subtitle">صور، فيديو، صوت — حللها بالذكاء الاصطناعي</p>
       </div>
-
       <div class="upload-zone" id="upload-zone"
         onclick="document.getElementById('file-input').click()"
         ondragover="Analyze.dragOver(event)"
@@ -388,21 +356,18 @@
           accept="image/*,audio/*,video/*"
           onchange="Analyze.handleFile(event)" />
       </div>
-
       <div class="form-group" style="margin-top:16px;">
         <textarea id="analyze-prompt" class="input" rows="2"
           placeholder="ماذا تريد أن تعرف عن الملف؟ (اختياري)"></textarea>
       </div>
-
       <button class="btn btn-primary" onclick="Analyze.analyze()"
         id="analyze-btn" style="margin-top:12px; display:none;">
         <span>تحليل الآن</span> <span>🔍</span>
       </button>
-
       <div id="analyze-result" class="analysis-result" style="display:none;"></div>
     </div>
 
-    <!-- ── PROMPTS PAGE ───────────────────────────── -->
+    <!-- PROMPTS -->
     <div id="page-prompts" class="image-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">✨ مكتبة البرومبتات</h2>
@@ -411,7 +376,7 @@
       <div id="prompts-container"></div>
     </div>
 
-    <!-- ── HISTORY PAGE ───────────────────────────── -->
+    <!-- HISTORY -->
     <div id="page-history" class="image-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">📋 السجل والمفضلة</h2>
@@ -424,26 +389,18 @@
       </div>
     </div>
 
-    <!-- ── SETTINGS PAGE ──────────────────────────── -->
+    <!-- SETTINGS -->
     <div id="page-settings" class="settings-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">⚙️ الإعدادات</h2>
       </div>
-
-      <!-- Theme -->
       <div class="settings-section">
         <div class="settings-section-title">🌙 الثيم</div>
         <div style="display:flex; gap:10px;">
-          <button class="btn btn-secondary" onclick="UI.setTheme('dark')" id="theme-dark">
-            🌙 داكن
-          </button>
-          <button class="btn btn-secondary" onclick="UI.setTheme('light')" id="theme-light">
-            ☀️ فاتح
-          </button>
+          <button class="btn btn-secondary" onclick="UI.setTheme('dark')">🌙 داكن</button>
+          <button class="btn btn-secondary" onclick="UI.setTheme('light')">☀️ فاتح</button>
         </div>
       </div>
-
-      <!-- Language -->
       <div class="settings-section">
         <div class="settings-section-title">🌐 اللغة</div>
         <div style="display:flex; gap:10px;">
@@ -451,8 +408,6 @@
           <button class="btn btn-secondary" onclick="UI.setLang('en')">🇺🇸 English</button>
         </div>
       </div>
-
-      <!-- Styles -->
       <div class="settings-section">
         <div class="settings-section-title">🎨 أسلوب التصميم</div>
         <div class="style-grid">
@@ -480,12 +435,11 @@
       </div>
     </div>
 
-    <!-- ── ADMIN PAGE ─────────────────────────────── -->
+    <!-- ADMIN -->
     <div id="page-admin" class="admin-page" style="display:none;">
       <div class="page-header">
         <h2 class="page-title">👑 لوحة الإدارة</h2>
       </div>
-
       <div class="admin-grid">
         <div class="stat-card">
           <div class="stat-icon">👥</div>
@@ -509,8 +463,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Logo Upload -->
       <div class="settings-section">
         <div class="settings-section-title">🖼️ اللوقو</div>
         <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
@@ -525,8 +477,6 @@
             accept="image/*" onchange="Admin.uploadLogo(event)" />
         </div>
       </div>
-
-      <!-- Invite Codes -->
       <div class="settings-section">
         <div class="settings-section-title">🔑 كودات الدعوة</div>
         <div id="invite-codes-list" style="margin-bottom:16px;"></div>
@@ -540,9 +490,8 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-     SCRIPTS
+     SCRIPTS — الترتيب مهم جداً
 ═══════════════════════════════════════════════════ -->
-<script src="js/app.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/image.js"></script>
@@ -551,6 +500,13 @@
 <script src="js/analyze.js"></script>
 <script src="js/prompts.js"></script>
 <script src="js/history.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => App.init(), 300);
+  });
+</script>
 
 </body>
 </html>
