@@ -53,11 +53,7 @@ const Chat = {
         });
 
         // حفظ في السجل
-        History.save(
-          'chat',
-          Object.values(data.results).join('\n\n---\n\n'),
-          this.messages[this.messages.length - 2].content
-        );
+        History.save('chat', Object.values(data.results).join('\n---\n'), text);
       }
       // ─── وضع التعاون ───────────────────────────────────
       else if (data.mode === 'collaborate') {
@@ -69,11 +65,7 @@ const Chat = {
         this.messages.push({ role: 'assistant', content: data.merged_response });
 
         // حفظ في السجل
-        History.save(
-          'chat',
-          data.merged_response,
-          this.messages[this.messages.length - 2].content
-        );
+        History.save('chat', data.merged_response, text);
       }
       // ─── نموذج واحد ────────────────────────────────────
       else {
@@ -81,11 +73,7 @@ const Chat = {
         this.messages.push({ role: 'assistant', content: data.response });
 
         // حفظ في السجل
-        History.save(
-          'chat',
-          data.response,
-          this.messages[this.messages.length - 2].content
-        );
+        History.save('chat', data.response, text);
       }
 
     } catch (e) {

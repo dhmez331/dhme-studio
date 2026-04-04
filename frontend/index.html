@@ -1,124 +1,606 @@
-<!-- VOICE -->
-<div id="page-voice" class="voice-page" style="display:none;">
-  <div class="page-header">
-    <h2 class="page-title">🎤 الصوت والتحويل</h2>
-    <p class="page-subtitle">نص لصوت + شيلات + إعلانات + تفريغ صوتي</p>
-  </div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-style="cosmic" data-theme="dark"></html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dhme Studio — دحمي استوديو</title>
+  <meta name="description" content="منصة ذكاء اصطناعي شخصية — Dhme Studio" />
 
-  <!-- Tabs -->
-  <div class="collab-toggle" style="margin-bottom:20px;">
-    <div class="collab-option active" onclick="Voice.switchTab('tts',this)">🔊 TTS</div>
-    <div class="collab-option" onclick="Voice.switchTab('lyrics',this)">🎵 شيلات</div>
-    <div class="collab-option" onclick="Voice.switchTab('commercial',this)">📢 إعلانات</div>
-    <div class="collab-option" onclick="Voice.switchTab('stt',this)">🎙️ تفريغ</div>
-  </div>
+  <!-- PWA -->
+  <meta name="theme-color" content="#7C3AED" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/logo.png" />
 
-  <!-- TTS Tab -->
-  <div id="voice-tab-tts">
-    <div class="tts-card">
-      <div class="form-group" style="margin-bottom:12px;">
-        <textarea id="tts-text" class="input" rows="4"
-          placeholder="اكتب النص..."></textarea>
-      </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-        <div class="form-group" style="flex:1;min-width:140px;">
-          <label class="form-label">الصوت</label>
-          <select id="tts-voice" class="input" style="padding:10px 12px;">
-            <option value="arabic_male">عربي رجالي</option>
-            <option value="arabic_female">عربي نسائي</option>
-            <option value="english_male">إنجليزي رجالي</option>
-            <option value="english_female">إنجليزي نسائي</option>
-            <option value="arabic_news">إخباري رسمي</option>
-            <option value="arabic_calm">هادئ ومريح</option>
-            <option value="commercial">تجاري</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:1;min-width:140px;">
-          <label class="form-label">الأسلوب</label>
-          <select id="tts-style" class="input" style="padding:10px 12px;">
-            <option value="normal">عادي</option>
-            <option value="news">إخباري</option>
-            <option value="calm">هادئ</option>
-            <option value="commercial">تجاري</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="Voice.tts()" id="tts-btn">
-          <span>توليد الصوت</span><span>🔊</span>
-        </button>
-      </div>
-      <audio id="tts-audio" class="audio-player" controls style="display:none;"></audio>
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     LOADING SCREEN
+═══════════════════════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="loading-logo">Dhme Studio</div>
+  <div class="loading-bar">
+    <div class="loading-bar-fill"></div>
+  </div>
+</div>
+
+<!-- Background Mesh -->
+<div class="bg-mesh"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════════ -->
+<div id="login-page" class="login-page" style="display:none;">
+  <div class="login-card">
+    <div class="login-logo">
+      <div style="font-size:3rem;">🧠</div>
+      <h1>Dhme Studio</h1>
+      <p>دحمي استوديو — منصة الذكاء الاصطناعي</p>
     </div>
-  </div>
 
-  <!-- Lyrics Tab -->
-  <div id="voice-tab-lyrics" style="display:none;">
-    <div class="tts-card">
-      <div class="form-group" style="margin-bottom:12px;">
-        <label class="form-label">الموضوع</label>
-        <input id="lyrics-theme" class="input" placeholder="مثال: الوطن والانتماء، الأم، الصداقة..." />
+    <div class="login-form">
+      <div class="form-group">
+        <label class="form-label">اسمك</label>
+        <input type="text" id="login-username" class="input"
+          placeholder="أدخل اسمك" autocomplete="off" />
       </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-        <div class="form-group" style="flex:1;min-width:140px;">
-          <label class="form-label">النوع</label>
-          <select id="lyrics-style" class="input" style="padding:10px 12px;">
-            <option value="sheilah">شيلة سعودية</option>
-            <option value="nasheed">نشيد بدون موسيقى</option>
-            <option value="poem">قصيدة نبطية</option>
-            <option value="song_ar">أغنية عربية</option>
-          </select>
-        </div>
-        <div class="form-group" style="flex:1;min-width:140px;">
-          <label class="form-label">الصوت</label>
-          <select id="lyrics-voice" class="input" style="padding:10px 12px;">
-            <option value="arabic_male">رجالي</option>
-            <option value="arabic_female">نسائي</option>
-            <option value="arabic_calm">هادئ</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="Voice.generateLyrics()" id="lyrics-btn">
-          <span>توليد</span><span>🎵</span>
-        </button>
-      </div>
-      <div id="lyrics-result" style="display:none;margin-top:16px;">
-        <div id="lyrics-text" class="analysis-result"></div>
-        <audio id="lyrics-audio" class="audio-player" controls style="display:none;margin-top:12px;"></audio>
-      </div>
-    </div>
-  </div>
 
-  <!-- Commercial Tab -->
-  <div id="voice-tab-commercial" style="display:none;">
-    <div class="tts-card">
-      <div class="form-group" style="margin-bottom:12px;">
-        <label class="form-label">المنتج أو الخدمة</label>
-        <input id="commercial-product" class="input"
-          placeholder="مثال: مطعم برغر الرياض، عطر ليلى، تطبيق دحمي..." />
+      <div class="form-group">
+        <label class="form-label">كود الدعوة</label>
+        <input type="password" id="login-code" class="input"
+          placeholder="أدخل كود الدعوة" />
       </div>
-      <div style="display:flex;gap:12px;align-items:flex-end;">
-        <div class="form-group" style="flex:1;">
-          <label class="form-label">المدة</label>
-          <select id="commercial-duration" class="input" style="padding:10px 12px;">
-            <option value="15">15 ثانية</option>
-            <option value="30" selected>30 ثانية</option>
-            <option value="60">دقيقة</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="Voice.generateCommercial()" id="commercial-btn">
-          <span>توليد الإعلان</span><span>📢</span>
-        </button>
-      </div>
-      <div id="commercial-script" class="analysis-result" style="display:none;margin-top:16px;"></div>
-      <audio id="commercial-audio" class="audio-player" controls style="display:none;margin-top:12px;"></audio>
-    </div>
-  </div>
 
-  <!-- STT Tab -->
-  <div id="voice-tab-stt" style="display:none;">
-    <div class="voice-recorder">
-      <h3 style="font-size:1rem;">🎙️ تفريغ الصوت إلى نص</h3>
-      <button class="record-btn" id="record-btn" onclick="Voice.toggleRecord()">🎤</button>
-      <p id="record-status" style="color:var(--text-muted);font-size:0.9rem;">اضغط للتسجيل</p>
-      <div id="transcription-result" class="analysis-result" style="display:none;width:100%;"></div>
+      <button class="btn btn-primary btn-lg" onclick="App.login()" id="login-btn">
+        <span>دخول</span>
+        <span>🚀</span>
+      </button>
+
+      <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
+        تواصل مع المدير للحصول على كود الدعوة
+      </p>
     </div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════════════ -->
+<div id="app" class="app-layout" style="display:none;">
+
+  <!-- ── Sidebar (Desktop) ───────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div style="font-size:1.6rem;">🧠</div>
+      <div>
+        <div class="sidebar-logo-text">Dhme Studio</div>
+        <div style="font-size:0.7rem; color:var(--text-muted);" id="sidebar-username"></div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="App.navigate('home')" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" data-translate="nav-home">الرئيسية</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('chat')" data-page="chat">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label" data-translate="nav-chat">المحادثة</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('image')" data-page="image">
+        <span class="nav-icon">🖼️</span>
+        <span class="nav-label" data-translate="nav-image">توليد الصور</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('voice')" data-page="voice">
+        <span class="nav-icon">🎤</span>
+        <span class="nav-label" data-translate="nav-voice">الصوت</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('video')" data-page="video">
+        <span class="nav-icon">🎬</span>
+        <span class="nav-label" data-translate="nav-video">الفيديو</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('analyze')" data-page="analyze">
+        <span class="nav-icon">🔍</span>
+        <span class="nav-label" data-translate="nav-analyze">تحليل الملفات</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('prompts')" data-page="prompts">
+        <span class="nav-icon">✨</span>
+        <span class="nav-label" data-translate="nav-prompts">البرومبتات</span>
+      </div>
+      <div class="nav-item" onclick="App.navigate('history')" data-page="history">
+        <span class="nav-icon">📋</span>
+        <span class="nav-label" data-translate="nav-history">السجل</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" onclick="App.navigate('settings')" data-page="settings">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label" data-translate="nav-settings">الإعدادات</span>
+      </div>
+      <div class="nav-item" id="admin-nav-item" onclick="App.navigate('admin')"
+        data-page="admin" style="display:none;">
+        <span class="nav-icon">👑</span>
+        <span class="nav-label" data-translate="nav-admin">لوحة الإدارة</span>
+      </div>
+      <div class="nav-item" onclick="App.logout()">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-label" data-translate="nav-logout">خروج</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Bottom Nav (Mobile) ─────────────────────── -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="bottom-nav-item active" onclick="App.navigate('home')" data-page="home">
+        <span class="nav-icon">🏠</span>
+        <span data-translate="nav-home">الرئيسية</span>
+      </div>
+      <div class="bottom-nav-item" onclick="App.navigate('chat')" data-page="chat">
+        <span class="nav-icon">💬</span>
+        <span data-translate="nav-chat">محادثة</span>
+      </div>
+      <div class="bottom-nav-item" onclick="App.navigate('image')" data-page="image">
+        <span class="nav-icon">🖼️</span>
+        <span data-translate="nav-image">صور</span>
+      </div>
+      <div class="bottom-nav-item" onclick="App.navigate('voice')" data-page="voice">
+        <span class="nav-icon">🎤</span>
+        <span data-translate="nav-voice">صوت</span>
+      </div>
+      <div class="bottom-nav-item" onclick="App.navigate('settings')" data-page="settings">
+        <span class="nav-icon">⚙️</span>
+        <span data-translate="nav-settings">إعدادات</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ────────────────────────────── -->
+  <main class="main-content" id="main-content">
+
+    <div id="toast-container"></div>
+
+    <!-- HOME -->
+    <div id="page-home" class="home-page">
+      <div class="home-header">
+        <h1 class="home-greeting gradient-text" id="home-greeting">أهلاً 👋</h1>
+        <p class="home-subtitle">وش تبي تسوي اليوم؟</p>
+      </div>
+      <div class="tools-grid">
+        <div class="tool-card" onclick="App.navigate('chat')">
+          <div class="tool-icon">💬</div>
+          <div class="tool-name">المحادثة الذكية</div>
+          <div class="tool-desc">تحدث مع أذكى نماذج AI — مع بحث في الإنترنت</div>
+        </div>
+        <div class="tool-card" onclick="App.navigate('image')">
+          <div class="tool-icon">🖼️</div>
+          <div class="tool-name">توليد الصور</div>
+          <div class="tool-desc">حوّل أفكارك لصور احترافية بـ FLUX و Imagen</div>
+        </div>
+        <div class="tool-card" onclick="App.navigate('voice')">
+          <div class="tool-icon">🎤</div>
+          <div class="tool-name">الصوت والتحويل</div>
+          <div class="tool-desc">نص لصوت + تفريغ صوتي بأفضل الأصوات</div>
+        </div>
+        <div class="tool-card" onclick="App.navigate('video')">
+          <div class="tool-icon">🎬</div>
+          <div class="tool-name">توليد الفيديو</div>
+          <div class="tool-desc">حوّل نصك لفيديو — قريباً</div>
+        </div>
+        <div class="tool-card" onclick="App.navigate('analyze')">
+          <div class="tool-icon">🔍</div>
+          <div class="tool-name">تحليل الملفات</div>
+          <div class="tool-desc">حلّل صور وفيديو وصوت بدقة عالية</div>
+        </div>
+        <div class="tool-card" onclick="App.navigate('prompts')">
+          <div class="tool-icon">✨</div>
+          <div class="tool-name">مكتبة البرومبتات</div>
+          <div class="tool-desc">برومبتات جاهزة + أضف برومبتاتك الخاصة</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="page-chat" class="chat-page" style="display:none;">
+      <div class="chat-header">
+        <h2 class="chat-title">💬 المحادثة الذكية</h2>
+        <div class="chat-controls">
+          <select id="chat-model" class="input" style="width:auto; padding:8px 12px;">
+            <option value="gemini_flash">Gemini 2.0 Flash</option>
+            <option value="gemini_pro">Gemini 1.5 Pro</option>
+            <option value="gemini_thinking">Gemini Thinking</option>
+            <option value="gemini_flash_lite">Gemini Flash Lite</option>
+            <option value="groq_llama">Llama 3.3 70B</option>
+            <option value="groq_llama4">Llama 4 Scout (جديد)</option>
+            <option value="groq_mistral">Mistral Saba</option>
+            <option value="groq_deepseek">DeepSeek R1</option>
+            <option value="groq_gemma">Gemma 2 9B</option>
+          </select>
+          <div class="collab-toggle">
+            <div class="collab-option active" onclick="Chat.setCollab(null, this)">فردي</div>
+            <div class="collab-option" onclick="Chat.setCollab('compete', this)">منافسة</div>
+            <div class="collab-option" onclick="Chat.setCollab('collaborate', this)">تعاون</div>
+          </div>
+          <button class="btn btn-secondary btn-icon" id="search-toggle"
+            onclick="Chat.toggleSearch()" title="بحث في الإنترنت">🔍</button>
+          <button class="btn btn-ghost btn-icon" onclick="Chat.clear()">🗑️</button>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <div class="empty-state-text">ابدأ محادثتك الآن</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea class="chat-input" id="chat-input"
+            placeholder="اكتب رسالتك هنا..." rows="1"
+            onkeydown="Chat.handleKey(event)"
+            oninput="Chat.autoResize(this)"></textarea>
+          <button class="btn btn-primary btn-icon" onclick="Chat.send()" id="chat-send-btn">
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGE -->
+    <div id="page-image" class="image-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">🖼️ توليد الصور</h2>
+        <p class="page-subtitle">حوّل كلماتك لصور احترافية</p>
+      </div>
+      <div class="image-controls">
+        <div class="form-group">
+          <label class="form-label">وصف الصورة</label>
+          <textarea id="image-prompt" class="input" rows="3"
+            placeholder="صف الصورة اللي تبيها..."></textarea>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="form-group" style="flex:1; min-width:160px;">
+            <label class="form-label">النموذج</label>
+            <select id="image-model" class="input" style="padding:10px 12px;">
+              <option value="flux_schnell">FLUX.1 Schnell (سريع)</option>
+              <option value="flux_dev">FLUX.1 Dev (جودة عالية)</option>
+              <option value="sdxl">Stable Diffusion XL</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:160px;">
+            <label class="form-label">الوضع</label>
+            <div class="collab-toggle">
+              <div class="collab-option active" onclick="ImageGen.setMode(null, this)">عادي</div>
+              <div class="collab-option" onclick="ImageGen.setMode('compete', this)">منافسة</div>
+              <div class="collab-option" onclick="ImageGen.setMode('collaborate', this)">تعاون</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="ImageGen.generate()" id="image-gen-btn">
+            <span>توليد</span> <span>✨</span>
+          </button>
+        </div>
+      </div>
+      <div id="image-results" class="image-results">
+        <div class="empty-state" style="grid-column:1/-1;">
+          <div class="empty-state-icon">🖼️</div>
+          <div class="empty-state-text">اكتب وصفاً واضغط توليد</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VOICE -->
+    <div id="page-voice" class="voice-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">🎤 الصوت والتحويل</h2>
+        <p class="page-subtitle">نص لصوت + شيلات + إعلانات + تفريغ صوتي</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="collab-toggle" style="margin-bottom:20px;">
+        <div class="collab-option active" onclick="Voice.switchTab('tts',this)">🔊 TTS</div>
+        <div class="collab-option" onclick="Voice.switchTab('lyrics',this)">🎵 شيلات</div>
+        <div class="collab-option" onclick="Voice.switchTab('commercial',this)">📢 إعلانات</div>
+        <div class="collab-option" onclick="Voice.switchTab('stt',this)">🎙️ تفريغ</div>
+      </div>
+
+      <!-- TTS Tab -->
+      <div id="voice-tab-tts">
+        <div class="tts-card">
+          <div class="form-group" style="margin-bottom:12px;">
+            <textarea id="tts-text" class="input" rows="4"
+              placeholder="اكتب النص..."></textarea>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="form-group" style="flex:1;min-width:140px;">
+              <label class="form-label">الصوت</label>
+              <select id="tts-voice" class="input" style="padding:10px 12px;">
+                <option value="arabic_male">عربي رجالي</option>
+                <option value="arabic_female">عربي نسائي</option>
+                <option value="english_male">إنجليزي رجالي</option>
+                <option value="english_female">إنجليزي نسائي</option>
+                <option value="arabic_news">إخباري رسمي</option>
+                <option value="arabic_calm">هادئ ومريح</option>
+                <option value="commercial">تجاري</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;">
+              <label class="form-label">الأسلوب</label>
+              <select id="tts-style" class="input" style="padding:10px 12px;">
+                <option value="normal">عادي</option>
+                <option value="news">إخباري</option>
+                <option value="calm">هادئ</option>
+                <option value="commercial">تجاري</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="Voice.tts()" id="tts-btn">
+              <span>توليد الصوت</span><span>🔊</span>
+            </button>
+          </div>
+          <audio id="tts-audio" class="audio-player" controls style="display:none;"></audio>
+        </div>
+      </div>
+
+      <!-- Lyrics Tab -->
+      <div id="voice-tab-lyrics" style="display:none;">
+        <div class="tts-card">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">الموضوع</label>
+            <input id="lyrics-theme" class="input" placeholder="مثال: الوطن والانتماء، الأم، الصداقة..." />
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+            <div class="form-group" style="flex:1;min-width:140px;">
+              <label class="form-label">النوع</label>
+              <select id="lyrics-style" class="input" style="padding:10px 12px;">
+                <option value="sheilah">شيلة سعودية</option>
+                <option value="nasheed">نشيد بدون موسيقى</option>
+                <option value="poem">قصيدة نبطية</option>
+                <option value="song_ar">أغنية عربية</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1;min-width:140px;">
+              <label class="form-label">الصوت</label>
+              <select id="lyrics-voice" class="input" style="padding:10px 12px;">
+                <option value="arabic_male">رجالي</option>
+                <option value="arabic_female">نسائي</option>
+                <option value="arabic_calm">هادئ</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="Voice.generateLyrics()" id="lyrics-btn">
+              <span>توليد</span><span>🎵</span>
+            </button>
+          </div>
+          <div id="lyrics-result" style="display:none;margin-top:16px;">
+            <div id="lyrics-text" class="analysis-result"></div>
+            <audio id="lyrics-audio" class="audio-player" controls style="display:none;margin-top:12px;"></audio>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commercial Tab -->
+      <div id="voice-tab-commercial" style="display:none;">
+        <div class="tts-card">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">المنتج أو الخدمة</label>
+            <input id="commercial-product" class="input"
+              placeholder="مثال: مطعم برغر الرياض، عطر ليلى، تطبيق دحمي..." />
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-end;">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">المدة</label>
+              <select id="commercial-duration" class="input" style="padding:10px 12px;">
+                <option value="15">15 ثانية</option>
+                <option value="30" selected>30 ثانية</option>
+                <option value="60">دقيقة</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="Voice.generateCommercial()" id="commercial-btn">
+              <span>توليد الإعلان</span><span>📢</span>
+            </button>
+          </div>
+          <div id="commercial-script" class="analysis-result" style="display:none;margin-top:16px;"></div>
+          <audio id="commercial-audio" class="audio-player" controls style="display:none;margin-top:12px;"></audio>
+        </div>
+      </div>
+
+      <!-- STT Tab -->
+      <div id="voice-tab-stt" style="display:none;">
+        <div class="voice-recorder">
+          <h3 style="font-size:1rem;">🎙️ تفريغ الصوت إلى نص</h3>
+          <button class="record-btn" id="record-btn" onclick="Voice.toggleRecord()">🎤</button>
+          <p id="record-status" style="color:var(--text-muted);font-size:0.9rem;">اضغط للتسجيل</p>
+          <div id="transcription-result" class="analysis-result" style="display:none;width:100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIDEO -->
+    <div id="page-video" class="image-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">🎬 توليد الفيديو</h2>
+        <p class="page-subtitle">قريباً — نعمل عليه</p>
+      </div>
+      <div class="empty-state card" style="padding:64px;">
+        <div class="empty-state-icon">🎬</div>
+        <div class="empty-state-text">
+          توليد الفيديو قيد التطوير<br/>
+          <span style="font-size:0.8rem; color:var(--text-muted);">سيتوفر في المرحلة القادمة</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANALYZE -->
+    <div id="page-analyze" class="analyze-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">🔍 تحليل الملفات</h2>
+        <p class="page-subtitle">صور، فيديو، صوت — حللها بالذكاء الاصطناعي</p>
+      </div>
+      <div class="upload-zone" id="upload-zone"
+        onclick="document.getElementById('file-input').click()"
+        ondragover="Analyze.dragOver(event)"
+        ondragleave="Analyze.dragLeave(event)"
+        ondrop="Analyze.drop(event)">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">اسحب ملفك هنا أو اضغط للاختيار</div>
+        <div class="upload-hint">يدعم: صور (JPG, PNG) — صوت (MP3, WAV) — فيديو (MP4)</div>
+        <input type="file" id="file-input" style="display:none;"
+          accept="image/*,audio/*,video/*"
+          onchange="Analyze.handleFile(event)" />
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <textarea id="analyze-prompt" class="input" rows="2"
+          placeholder="ماذا تريد أن تعرف عن الملف؟ (اختياري)"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="Analyze.analyze()"
+        id="analyze-btn" style="margin-top:12px; display:none;">
+        <span>تحليل الآن</span> <span>🔍</span>
+      </button>
+      <div id="analyze-result" class="analysis-result" style="display:none;"></div>
+    </div>
+
+    <!-- PROMPTS -->
+    <div id="page-prompts" class="image-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">✨ مكتبة البرومبتات</h2>
+        <p class="page-subtitle">برومبتات جاهزة + أضف برومبتاتك</p>
+      </div>
+      <div id="prompts-container"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div id="page-history" class="image-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">📋 السجل والمفضلة</h2>
+      </div>
+      <div id="history-container">
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-text">لا يوجد سجل بعد</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="page-settings" class="settings-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">⚙️ الإعدادات</h2>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🌙 الثيم</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" id="theme-dark" onclick="UI.setTheme('dark')">🌙 داكن</button>
+          <button class="btn btn-secondary" id="theme-light" onclick="UI.setTheme('light')">☀️ فاتح</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🌐 اللغة</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-secondary" onclick="UI.setLang('ar')">🇸🇦 عربي</button>
+          <button class="btn btn-secondary" onclick="UI.setLang('en')">🇺🇸 English</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🎨 أسلوب التصميم</div>
+        <div class="style-grid">
+          <div class="style-option active" onclick="UI.setStyle('cosmic', this)">
+            <div class="style-preview" style="background:linear-gradient(135deg,#7C3AED,#3B82F6);"></div>
+            Cosmic Dark
+          </div>
+          <div class="style-option" onclick="UI.setStyle('desert', this)">
+            <div class="style-preview" style="background:linear-gradient(135deg,#D4AF37,#C17F24);"></div>
+            Desert Gold
+          </div>
+          <div class="style-option" onclick="UI.setStyle('neon', this)">
+            <div class="style-preview" style="background:linear-gradient(135deg,#00FF88,#00CC6A);"></div>
+            Neon Tech
+          </div>
+          <div class="style-option" onclick="UI.setStyle('ocean', this)">
+            <div class="style-preview" style="background:linear-gradient(135deg,#0066CC,#0099FF);"></div>
+            Ocean Breeze
+          </div>
+          <div class="style-option" onclick="UI.setStyle('rose', this)">
+            <div class="style-preview" style="background:linear-gradient(135deg,#E91E8C,#FF6BB5);"></div>
+            Rose Modern
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="admin-page" style="display:none;">
+      <div class="page-header">
+        <h2 class="page-title">👑 لوحة الإدارة</h2>
+      </div>
+      <div class="admin-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div>
+            <div class="stat-value" id="stat-users">—</div>
+            <div class="stat-label">المستخدمون النشطون</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💬</div>
+          <div>
+            <div class="stat-value" id="stat-chats">—</div>
+            <div class="stat-label">المحادثات اليوم</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🖼️</div>
+          <div>
+            <div class="stat-value" id="stat-images">—</div>
+            <div class="stat-label">الصور المولّدة</div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🖼️ اللوقو</div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+          <img id="current-logo" src="/logo.png" alt="Logo"
+            style="width:48px; height:48px; border-radius:8px; border:1px solid var(--border);"
+            onerror="this.style.display='none'" />
+          <button class="btn btn-secondary"
+            onclick="document.getElementById('logo-upload').click()">
+            📁 تغيير اللوقو
+          </button>
+          <input type="file" id="logo-upload" style="display:none;"
+            accept="image/*" onchange="Admin.uploadLogo(event)" />
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">🔑 كودات الدعوة</div>
+        <div id="invite-codes-list" style="margin-bottom:16px;"></div>
+        <button class="btn btn-primary" onclick="Admin.generateCode()">
+          + إنشاء كود جديد
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCRIPTS — الترتيب مهم جداً
+═══════════════════════════════════════════════════ -->
+<script src="js/ui.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/image.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/video.js"></script>
+<script src="js/analyze.js"></script>
+<script src="js/prompts.js"></script>
+<script src="js/history.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+  window.addEventListener('load', () => {
+    setTimeout(() => App.init(), 300);
+  });
+</script>
+
+</body>
+</html>

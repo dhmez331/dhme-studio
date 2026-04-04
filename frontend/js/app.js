@@ -208,56 +208,151 @@ const App = {
 
 // ─── Admin ───────────────────────────────────────────────
 const Admin = {
+
   init() {
     if (!App.state.isAdmin) {
       App.navigate('home');
       UI.toast('هذه الصفحة للمدير فقط', 'error');
       return;
     }
+    this.loadStats();
     this.loadInviteCodes();
+    this.loadLogo();
+  },
+
+  loadLogo() {
+    const logo = localStorage.getItem('dhme_logo');
+    const el = document.getElementById('current-logo');
+    if (logo && el) { el.src = logo; el.style.display = 'block'; }
   },
 
   uploadLogo(event) {
     const file = event.target.files[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) return UI.toast('يجب أن يكون الملف صورة', 'error');
+    if (file.size > 2 * 1024 * 1024) return UI.toast('الصورة أكبر من 2MB', 'error');
+
     const reader = new FileReader();
     reader.onload = (e) => {
-      localStorage.setItem('dhme_logo', e.target.result);
-      const logo = document.getElementById('current-logo');
-      if (logo) logo.src = e.target.result;
-      UI.toast('تم تحديث اللوقو ✅', 'success');
+      const img = new Image();
+      img.onload = () => {
+        // ضغط الصورة
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = h * MAX / w; w = MAX; }
+        else if (h > MAX) { w = w * MAX / h; h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/png', 0.8);
+        localStorage.setItem('dhme_logo', compressed);
+        document.getElementById('current-logo').src = compressed;
+        document.getElementById('current-logo').style.display = 'block';
+        // تحديث اللوقو في الـ sidebar
+        document.querySelectorAll('.logo-img').forEach(i => i.src = compressed);
+        UI.toast('تم تحديث اللوقو ✅', 'success');
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
+  },
+
+  loadStats() {
+    const history = History.get();
+    const today   = new Date().toLocaleDateString('ar-SA');
+
+    const todayItems = history.filter(h => h.date === today);
+    const chats  = todayItems.filter(h => h.type === 'chat').length;
+    const images = todayItems.filter(h => h.type === 'image').length;
+
+    const codes = this.getCodes();
+    document.getElementById('stat-users').textContent  = codes.length;
+    document.getElementById('stat-chats').textContent  = chats;
+    document.getElementById('stat-images').textContent = images;
+  },
+
+  getCodes() {
+    try {
+      return JSON.parse(localStorage.getItem('dhme_invite_codes') || '[]');
+    } catch { return []; }
+  },
+
+  saveCodes(codes) {
+    localStorage.setItem('dhme_invite_codes', JSON.stringify(codes));
   },
 
   loadInviteCodes() {
     const container = document.getElementById('invite-codes-list');
     if (!container) return;
-    const codes = [
+
+    // كودات افتراضية + المحفوظة
+    const defaultCodes = [
       { code: 'dhme_family_001', user: 'family1', type: 'عائلة' },
       { code: 'dhme_family_002', user: 'family2', type: 'عائلة' },
       { code: 'dhme_friend_001', user: 'friend1', type: 'صديق' },
       { code: 'dhme_friend_002', user: 'friend2', type: 'صديق' },
     ];
-    container.innerHTML = codes.map(c => `
-      <div class="card" style="display:flex; justify-content:space-between;
-        align-items:center; margin-bottom:8px; padding:12px 16px;">
-        <div>
+
+    const saved = this.getCodes();
+    const all   = [...defaultCodes, ...saved];
+
+    container.innerHTML = all.map(c => `
+      <div class="card" style="display:flex;justify-content:space-between;
+        align-items:center;margin-bottom:8px;padding:12px 16px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span class="badge">${c.type}</span>
-          <code style="margin-inline-start:10px; font-family:var(--font-mono);
-            color:var(--accent-1);">${c.code}</code>
+          <code style="font-family:var(--font-mono);color:var(--accent-1);
+            font-size:0.85rem;">${c.code}</code>
         </div>
-        <span style="color:var(--text-muted); font-size:0.85rem;">${c.user}</span>
-      </div>
-    `).join('');
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="color:var(--text-muted);font-size:0.85rem;">${c.user}</span>
+          <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.75rem;"
+            onclick="UI.copy('${c.code}')">نسخ</button>
+          ${c.custom ? `
+            <button class="btn btn-ghost" style="padding:4px 8px;font-size:0.75rem;color:#ef4444;"
+              onclick="Admin.deleteCode('${c.code}')">حذف</button>` : ''}
+        </div>
+      </div>`).join('');
   },
 
   generateCode() {
-    const code = 'dhme_' + Math.random().toString(36).substr(2, 8);
-    UI.toast(`كود جديد: ${code}`, 'info');
-  }
-};
+    UI.showModal(
+      '➕ كود دعوة جديد',
+      `<div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="form-group">
+          <label class="form-label">اسم المستخدم</label>
+          <input id="new-code-user" class="input" placeholder="مثال: احمد، سارة..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">النوع</label>
+          <select id="new-code-type" class="input" style="padding:10px 12px;">
+            <option value="عائلة">عائلة</option>
+            <option value="صديق">صديق</option>
+            <option value="ضيف">ضيف</option>
+          </select>
+        </div>
+      </div>`,
+      () => {
+        const user = document.getElementById('new-code-user').value.trim();
+        const type = document.getElementById('new-code-type').value;
+        if (!user) return UI.toast('أدخل اسم المستخدم', 'error');
+        const code = 'dhme_' + Math.random().toString(36).substr(2, 8);
+        const codes = this.getCodes();
+        codes.push({ code, user, type, custom: true });
+        this.saveCodes(codes);
+        this.loadInviteCodes();
+        UI.toast(`تم إنشاء الكود: ${code}`, 'success');
+      }
+    );
+  },
 
+  deleteCode(code) {
+    const codes = this.getCodes().filter(c => c.code !== code);
+    this.saveCodes(codes);
+    this.loadInviteCodes();
+    UI.toast('تم حذف الكود', 'info');
+  },
+};
 // ─── Enter key للـ Login ─────────────────────────────────
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {

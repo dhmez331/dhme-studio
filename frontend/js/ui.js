@@ -1,11 +1,5 @@
-/* ═══════════════════════════════════════════════════════════
-   Dhme Studio — ui.js
-   Theme + Style + Language + Toast + Helpers
-═══════════════════════════════════════════════════════════ */
-
 const UI = {
 
-  // ─── Load Saved Settings ────────────────────────────────
   loadSettings() {
     const style = localStorage.getItem('dhme_style') || 'cosmic';
     const theme = localStorage.getItem('dhme_theme') || 'dark';
@@ -15,21 +9,19 @@ const UI = {
     this.applyStyle(style);
     this.applyTheme(theme);
     this.applyLang(lang);
-
     if (logo) {
       document.querySelectorAll('.logo-img').forEach(img => img.src = logo);
     }
-
-    // تحديث الـ Active في settings
     this.updateStyleActive(style);
+    this.updateThemeActive(theme);
   },
 
-  // ─── Style (5 أساليب) ───────────────────────────────────
+  // ─── Style ───────────────────────────────────────────
   setStyle(style, el = null) {
     localStorage.setItem('dhme_style', style);
     this.applyStyle(style);
     this.updateStyleActive(style);
-    if (el) UI.toast(`تم تطبيق الأسلوب ✅`, 'success');
+    if (el) this.toast('تم تطبيق الأسلوب ✅', 'success');
   },
 
   applyStyle(style) {
@@ -37,43 +29,40 @@ const UI = {
   },
 
   updateStyleActive(style) {
-    document.querySelectorAll('.style-option').forEach(opt => {
+    document.querySelectorAll('.style-option').forEach((opt, i) => {
       opt.classList.remove('active');
     });
     const styles = ['cosmic','desert','neon','ocean','rose'];
-    const idx    = styles.indexOf(style);
-    const opts   = document.querySelectorAll('.style-option');
+    const idx = styles.indexOf(style);
+    const opts = document.querySelectorAll('.style-option');
     if (opts[idx]) opts[idx].classList.add('active');
   },
 
-  // ─── Theme (Dark / Light) ───────────────────────────────
+  // ─── Theme ───────────────────────────────────────────
   setTheme(theme) {
     localStorage.setItem('dhme_theme', theme);
     this.applyTheme(theme);
-    UI.toast(theme === 'dark' ? '🌙 الثيم الداكن' : '☀️ الثيم الفاتح', 'info');
+    this.updateThemeActive(theme);
+    this.toast(theme === 'dark' ? '🌙 الثيم الداكن' : '☀️ الثيم الفاتح', 'info');
   },
 
   applyTheme(theme) {
-    // الأساليب الداكنة والفاتحة
-    const darkStyles  = ['cosmic', 'desert', 'neon'];
-    const lightStyles = ['ocean', 'rose'];
-
-    const currentStyle = document.documentElement.getAttribute('data-style');
-
-    if (theme === 'light' && darkStyles.includes(currentStyle)) {
-      this.applyStyle('ocean');
-      localStorage.setItem('dhme_style', 'ocean');
-    } else if (theme === 'dark' && lightStyles.includes(currentStyle)) {
-      this.applyStyle('cosmic');
-      localStorage.setItem('dhme_style', 'cosmic');
-    }
+    document.documentElement.setAttribute('data-theme', theme);
   },
 
-  // ─── Language ───────────────────────────────────────────
+  updateThemeActive(theme) {
+    document.getElementById('theme-dark')?.classList.toggle('btn-primary', theme === 'dark');
+    document.getElementById('theme-dark')?.classList.toggle('btn-secondary', theme !== 'dark');
+    document.getElementById('theme-light')?.classList.toggle('btn-primary', theme === 'light');
+    document.getElementById('theme-light')?.classList.toggle('btn-secondary', theme !== 'light');
+  },
+
+  // ─── Language ─────────────────────────────────────────
   setLang(lang) {
     localStorage.setItem('dhme_lang', lang);
     this.applyLang(lang);
-    UI.toast(lang === 'ar' ? '🇸🇦 العربية' : '🇺🇸 English', 'info');
+    this.translateUI(lang);
+    this.toast(lang === 'ar' ? '🇸🇦 العربية' : '🇺🇸 English', 'info');
   },
 
   applyLang(lang) {
@@ -81,19 +70,67 @@ const UI = {
     document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
   },
 
-  // ─── Toast ──────────────────────────────────────────────
+  translateUI(lang) {
+    const translations = {
+      ar: {
+        'nav-home':     'الرئيسية',
+        'nav-chat':     'المحادثة',
+        'nav-image':    'توليد الصور',
+        'nav-voice':    'الصوت',
+        'nav-video':    'الفيديو',
+        'nav-analyze':  'تحليل الملفات',
+        'nav-prompts':  'البرومبتات',
+        'nav-history':  'السجل',
+        'nav-settings': 'الإعدادات',
+        'nav-admin':    'لوحة الإدارة',
+        'nav-logout':   'خروج',
+        'home-subtitle': 'وش تبي تسوي اليوم؟',
+        'chat-placeholder': 'اكتب رسالتك هنا...',
+        'chat-empty': 'ابدأ محادثتك الآن',
+      },
+      en: {
+        'nav-home':     'Home',
+        'nav-chat':     'Chat',
+        'nav-image':    'Image Gen',
+        'nav-voice':    'Voice',
+        'nav-video':    'Video',
+        'nav-analyze':  'Analyze',
+        'nav-prompts':  'Prompts',
+        'nav-history':  'History',
+        'nav-settings': 'Settings',
+        'nav-admin':    'Admin',
+        'nav-logout':   'Logout',
+        'home-subtitle': 'What would you like to do today?',
+        'chat-placeholder': 'Type your message here...',
+        'chat-empty': 'Start chatting now',
+      }
+    };
+
+    const t = translations[lang];
+
+    // ترجمة الـ nav labels
+    document.querySelectorAll('[data-translate]').forEach(el => {
+      const key = el.dataset.translate;
+      if (t[key]) el.textContent = t[key];
+    });
+
+    // ترجمة placeholder
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) chatInput.placeholder = t['chat-placeholder'];
+
+    const subtitle = document.getElementById('home-subtitle-text');
+    if (subtitle) subtitle.textContent = t['home-subtitle'];
+  },
+
+  // ─── Toast ────────────────────────────────────────────
   toast(message, type = 'info', duration = 3000) {
     const container = document.getElementById('toast-container');
     if (!container) return;
-
-    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-
+    const icons = { success:'✅', error:'❌', info:'ℹ️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
-
+    toast.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${message}</span>`;
     container.appendChild(toast);
-
     setTimeout(() => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(100%)';
@@ -102,11 +139,9 @@ const UI = {
     }, duration);
   },
 
-  // ─── Modal ──────────────────────────────────────────────
   showModal(title, content, onConfirm = null) {
     const existing = document.getElementById('global-modal');
     if (existing) existing.remove();
-
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.id = 'global-modal';
@@ -117,29 +152,22 @@ const UI = {
           <button class="btn btn-ghost btn-icon" onclick="UI.closeModal()">✕</button>
         </div>
         <div style="margin-bottom:20px;">${content}</div>
-        <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
           <button class="btn btn-secondary" onclick="UI.closeModal()">إلغاء</button>
-          ${onConfirm ? `<button class="btn btn-primary" onclick="(${onConfirm})(); UI.closeModal()">تأكيد</button>` : ''}
+          ${onConfirm ? `<button class="btn btn-primary" onclick="(${onConfirm})();UI.closeModal()">تأكيد</button>` : ''}
         </div>
-      </div>
-    `;
-
+      </div>`;
     document.body.appendChild(modal);
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) this.closeModal();
-    });
+    modal.addEventListener('click', e => { if (e.target === modal) this.closeModal(); });
   },
 
   closeModal() {
-    const modal = document.getElementById('global-modal');
-    if (modal) modal.remove();
+    document.getElementById('global-modal')?.remove();
   },
 
-  // ─── Loading State ──────────────────────────────────────
   setLoading(btnId, loading, originalHTML = null) {
     const btn = document.getElementById(btnId);
     if (!btn) return;
-
     if (loading) {
       btn._originalHTML = btn.innerHTML;
       btn.innerHTML = '<div class="spinner"></div>';
@@ -150,7 +178,6 @@ const UI = {
     }
   },
 
-  // ─── Format Markdown (بسيط) ─────────────────────────────
   formatMarkdown(text) {
     if (!text) return '';
     return text
@@ -160,25 +187,18 @@ const UI = {
       .replace(/\n/g,            '<br>');
   },
 
-  // ─── Copy to Clipboard ──────────────────────────────────
   async copy(text) {
     try {
       await navigator.clipboard.writeText(text);
       this.toast('تم النسخ ✅', 'success');
-    } catch {
-      this.toast('فشل النسخ', 'error');
-    }
+    } catch { this.toast('فشل النسخ', 'error'); }
   },
 
-  // ─── Download ───────────────────────────────────────────
   download(url, filename) {
     const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
+    a.href = url; a.download = filename; a.click();
   },
 
-  // ─── Download Blob ───────────────────────────────────────
   downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     this.download(url, filename);

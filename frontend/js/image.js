@@ -50,18 +50,26 @@ const ImageGen = {
       if (this.mode === 'compete') {
         const data = await App.apiJSON('/api/image/generate', payload);
         this.renderCompeteImages(data);
+
+        // بعد توليد الصورة بنجاح
+        History.save('image', prompt, prompt.substring(0,60));
       }
       // ─── وضع التعاون ────────────────────────────────
       else if (this.mode === 'collaborate') {
         const data = await App.apiJSON('/api/image/generate', payload);
         this.renderCollabImage(data);
+        // بعد توليد الصورة بنجاح
+        History.save('image', prompt, prompt.substring(0,60));
       }
       // ─── نموذج واحد ─────────────────────────────────
       else {
         const blob = await App.apiBlob('/api/image/generate', payload);
         const url  = URL.createObjectURL(blob);
         this.renderSingleImage(url, model, prompt);
+        // بعد توليد الصورة بنجاح
+        History.save('image', prompt, prompt.substring(0,60));
       }
+
 
     } catch (e) {
       UI.toast(e.message, 'error');
