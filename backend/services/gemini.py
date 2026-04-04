@@ -6,22 +6,23 @@ load_dotenv(find_dotenv())
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# ─── Models ──────────────────────────────────────────────
+# ─── Models (محدّثة 2026) ─────────────────────────────────
 GEMINI_MODELS = {
-    "flash":      "gemini-2.0-flash-exp",
+    "flash":      "gemini-2.0-flash",
     "pro":        "gemini-1.5-pro",
-    "thinking":   "gemini-2.0-flash-thinking-exp",
+    "thinking":   "gemini-2.0-flash-thinking-exp-01-21",
     "flash_8b":   "gemini-1.5-flash-8b",
+    "flash_lite": "gemini-2.0-flash-lite",
 }
 
 GEMINI_MODEL_NAMES = {
-    "flash":    "Gemini 2.0 Flash",
-    "pro":      "Gemini 1.5 Pro",
-    "thinking": "Gemini 2.0 Thinking (تفكير عميق)",
-    "flash_8b": "Gemini 1.5 Flash 8B (سريع)",
+    "flash":      "Gemini 2.0 Flash",
+    "pro":        "Gemini 1.5 Pro",
+    "thinking":   "Gemini 2.0 Thinking",
+    "flash_8b":   "Gemini 1.5 Flash 8B",
+    "flash_lite": "Gemini 2.0 Flash Lite (سريع)",
 }
 
-# ─── Chat ────────────────────────────────────────────────
 async def gemini_chat(
     messages: list,
     model: str = "flash",
@@ -29,22 +30,17 @@ async def gemini_chat(
 ) -> str:
     try:
         model_id = GEMINI_MODELS.get(model, GEMINI_MODELS["flash"])
-
         config = {}
         if system_prompt:
             config["system_instruction"] = system_prompt
 
         mdl = genai.GenerativeModel(model_id, **config)
-
         history = []
         last_message = messages[-1]["content"] if messages else ""
 
         for msg in messages[:-1]:
             role = "user" if msg["role"] == "user" else "model"
-            history.append({
-                "role": role,
-                "parts": [msg["content"]]
-            })
+            history.append({"role": role, "parts": [msg["content"]]})
 
         chat = mdl.start_chat(history=history)
         response = chat.send_message(last_message)
@@ -53,16 +49,14 @@ async def gemini_chat(
     except Exception as e:
         raise Exception(f"Gemini error ({model}): {str(e)}")
 
-# ─── Chat with Multiple Gemini Models ────────────────────
 async def gemini_chat_multi(
     messages: list,
     models: list = None,
     system_prompt: str = None
 ) -> dict:
     import asyncio
-
     if not models:
-        models = ["flash", "pro", "thinking"]
+        models = ["flash", "pro"]
 
     async def single_chat(model):
         try:
@@ -73,43 +67,8 @@ async def gemini_chat_multi(
 
     tasks = [single_chat(m) for m in models]
     results = await asyncio.gather(*tasks)
+    return {GEMINI_MODEL_NAMES.get(m, m): r for m, r in results}
 
-    return {
-        GEMINI_MODEL_NAMES.get(model, model): response
-        for model, response in results
-    }
-
-# ─── Generate Image with Imagen 3 ────────────────────────
-async def imagen_generate(
-    prompt: str,
-    number_of_images: int = 1,
-    aspect_ratio: str = "1:1"
-) -> list:
-    """
-    توليد صور باستخدام Imagen 3 من Google
-    يرجع قائمة من bytes
-    """
-    try:
-        from google.generativeai import ImageGenerationModel
-
-        model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
-
-        response = model.generate_images(
-            prompt=prompt,
-            number_of_images=number_of_images,
-            aspect_ratio=aspect_ratio,
-        )
-
-        images = []
-        for img in response.images:
-            images.append(img._image_bytes)
-
-        return images
-
-    except Exception as e:
-        raise Exception(f"Imagen 3 error: {str(e)}")
-
-# ─── Analyze Image ───────────────────────────────────────
 async def gemini_analyze_image(
     image_data: bytes,
     prompt: str,
@@ -118,16 +77,13 @@ async def gemini_analyze_image(
     try:
         import PIL.Image
         import io
-
         img = PIL.Image.open(io.BytesIO(image_data))
         mdl = genai.GenerativeModel(GEMINI_MODELS["flash"])
         response = mdl.generate_content([prompt, img])
         return response.text
-
     except Exception as e:
         raise Exception(f"Gemini image analysis error: {str(e)}")
 
-# ─── Analyze File (Video/Audio) ───────────────────────────
 async def gemini_analyze_file(
     file_data: bytes,
     mime_type: str,
@@ -135,13 +91,10 @@ async def gemini_analyze_file(
 ) -> str:
     try:
         import tempfile
-
         suffix = {
-            "video/mp4":   ".mp4",
-            "audio/mpeg":  ".mp3",
-            "audio/wav":   ".wav",
-            "image/jpeg":  ".jpg",
-            "image/png":   ".png"
+            "video/mp4": ".mp4", "audio/mpeg": ".mp3",
+            "audio/wav": ".wav", "image/jpeg": ".jpg",
+            "image/png": ".png", "application/pdf": ".pdf"
         }.get(mime_type, ".tmp")
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -151,16 +104,34 @@ async def gemini_analyze_file(
         uploaded = genai.upload_file(tmp_path, mime_type=mime_type)
         mdl = genai.GenerativeModel(GEMINI_MODELS["pro"])
         response = mdl.generate_content([prompt, uploaded])
-
         os.unlink(tmp_path)
         return response.text
-
     except Exception as e:
         raise Exception(f"Gemini file analysis error: {str(e)}")
 
-# ─── Get All Models Info ──────────────────────────────────
+async def gemini_edit_image(
+    image_data: bytes,
+    prompt: str,
+    mime_type: str = "image/jpeg"
+) -> str:
+    """تحليل الصورة وإعطاء تعليمات تعديل مفصلة"""
+    try:
+        import PIL.Image
+        import io
+        img = PIL.Image.open(io.BytesIO(image_data))
+        mdl = genai.GenerativeModel(GEMINI_MODELS["flash"])
+        edit_prompt = f"""أنت محرر صور محترف. المستخدم يريد: {prompt}
+        
+حلّل هذه الصورة بدقة واعطِ:
+1. وصف الصورة الحالية بالتفصيل
+2. برومبت احترافي بالإنجليزية لتوليد صورة معدّلة حسب طلب المستخدم
+3. اجعل البرومبت يحتفظ بعناصر الصورة الأصلية مع إضافة التعديلات المطلوبة
+
+أعطِ البرومبت فقط في السطر الأخير بعد كلمة PROMPT:"""
+        response = mdl.generate_content([edit_prompt, img])
+        return response.text
+    except Exception as e:
+        raise Exception(f"Gemini edit image error: {str(e)}")
+
 def get_gemini_models_list() -> list:
-    return [
-        {"id": k, "name": v, "provider": "Google"}
-        for k, v in GEMINI_MODEL_NAMES.items()
-    ]
+    return [{"id": k, "name": v, "provider": "Google"} for k, v in GEMINI_MODEL_NAMES.items()]

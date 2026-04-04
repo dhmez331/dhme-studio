@@ -60,11 +60,31 @@ const Prompts = {
       <!-- List -->
       <div class="tools-grid">
         ${filtered.map(p => `
-          <div class="tool-card" onclick="Prompts.use(${JSON.stringify(p.prompt).replace(/'/g, "&#39;")})">
+          <div class="tool-card">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <span class="badge">${p.type}</span>
-              ${p.custom ? `<button class="btn btn-ghost" style="padding:2px 6px; font-size:0.75rem;"
-                onclick="event.stopPropagation(); Prompts.delete(${p.id})">🗑️</button>` : ''}
+              <div style="display:flex; gap:4px;">
+                <button 
+                  onclick="event.stopPropagation();UI.copy(\`${p.prompt.replace(/`/g,'\\`')}\`)" 
+                  class="btn btn-ghost" 
+                  style="font-size:0.75rem; padding:4px 8px;">
+                  نسخ
+                </button>
+                <button 
+                  onclick="event.stopPropagation();Prompts.use(\`${p.prompt.replace(/`/g,'\\`')}\`)"
+                  class="btn btn-primary" 
+                  style="font-size:0.75rem; padding:4px 8px;">
+                  استخدام
+                </button>
+                ${p.custom ? `
+                  <button 
+                    onclick="event.stopPropagation();Prompts.delete(${p.id})" 
+                    class="btn btn-ghost" 
+                    style="font-size:0.75rem; padding:4px 6px;">
+                    🗑️
+                  </button>
+                ` : ''}
+              </div>
             </div>
             <div class="tool-name">${p.name}</div>
             <div class="tool-desc">${p.prompt.substring(0, 80)}...</div>

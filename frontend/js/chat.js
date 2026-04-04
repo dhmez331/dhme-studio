@@ -51,6 +51,13 @@ const Chat = {
           role: 'assistant',
           content: Object.values(data.results).join('\n\n---\n\n')
         });
+
+        // حفظ في السجل
+        History.save(
+          'chat',
+          Object.values(data.results).join('\n\n---\n\n'),
+          this.messages[this.messages.length - 2].content
+        );
       }
       // ─── وضع التعاون ───────────────────────────────────
       else if (data.mode === 'collaborate') {
@@ -58,12 +65,27 @@ const Chat = {
           label: '🤝 إجابة مدمجة من عدة نماذج',
           showIndividual: data.individual_responses
         });
+
         this.messages.push({ role: 'assistant', content: data.merged_response });
+
+        // حفظ في السجل
+        History.save(
+          'chat',
+          data.merged_response,
+          this.messages[this.messages.length - 2].content
+        );
       }
       // ─── نموذج واحد ────────────────────────────────────
       else {
         this.renderMessage('ai', data.response);
         this.messages.push({ role: 'assistant', content: data.response });
+
+        // حفظ في السجل
+        History.save(
+          'chat',
+          data.response,
+          this.messages[this.messages.length - 2].content
+        );
       }
 
     } catch (e) {
@@ -191,13 +213,11 @@ const Chat = {
   setCollab(mode, el) {
     this.collaborationMode = mode;
 
-    // تحديث الـ Active
     el.closest('.collab-toggle').querySelectorAll('.collab-option').forEach(o => {
       o.classList.remove('active');
     });
     el.classList.add('active');
 
-    // إخفاء/إظهار model selector في وضع التعاون
     const modelSel = document.getElementById('chat-model');
     if (modelSel) modelSel.style.opacity = mode ? '0.4' : '1';
   },
