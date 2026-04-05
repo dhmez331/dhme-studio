@@ -6,7 +6,7 @@ load_dotenv(find_dotenv())
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# ─── Models (محدّثة 2026) ─────────────────────────────────
+# ─── Models ───────────────────────────────────────────────
 GEMINI_MODELS = {
     "flash":      "gemini-2.0-flash",
     "pro":        "gemini-1.5-pro",
@@ -20,7 +20,7 @@ GEMINI_MODEL_NAMES = {
     "pro":        "Gemini 1.5 Pro",
     "thinking":   "Gemini 2.0 Thinking",
     "flash_8b":   "Gemini 1.5 Flash 8B",
-    "flash_lite": "Gemini 2.0 Flash Lite (سريع)",
+    "flash_lite": "Gemini 2.0 Flash Lite",
 }
 
 async def gemini_chat(
@@ -47,7 +47,12 @@ async def gemini_chat(
         return response.text
 
     except Exception as e:
-        raise Exception(f"Gemini error ({model}): {str(e)}")
+        error_str = str(e)
+        # إذا quota خلصت، نرجع لـ Groq تلقائياً
+        if "429" in error_str or "quota" in error_str.lower():
+            from services.groq_service import groq_chat
+            return await groq_chat(messages, "llama", system_prompt)
+        raise Exception(f"Gemini error ({model}): {error_str}")
 
 async def gemini_chat_multi(
     messages: list,
@@ -82,7 +87,13 @@ async def gemini_analyze_image(
         response = mdl.generate_content([prompt, img])
         return response.text
     except Exception as e:
-        raise Exception(f"Gemini image analysis error: {str(e)}")
+        error_str = str(e)
+        if "429" in error_str or "quota" in error_str.lower():
+            # Fallback: نرسل الـ prompt بدون الصورة لـ Groq
+            from services.groq_service import groq_chat
+            msgs = [{"role": "user", "content": f"{prompt}\n\n(ملاحظة: تعذّر تحليل الصورة بسبب quota)"}]
+            return await groq_chat(msgs, "llama")
+        raise Exception(f"Gemini image analysis error: {error_str}")
 
 async def gemini_analyze_file(
     file_data: bytes,
@@ -106,32 +117,47 @@ async def gemini_analyze_file(
         response = mdl.generate_content([prompt, uploaded])
         os.unlink(tmp_path)
         return response.text
+
     except Exception as e:
-        raise Exception(f"Gemini file analysis error: {str(e)}")
+        error_str = str(e)
+        if "429" in error_str or "quota" in error_str.lower():
+            from services.groq_service import groq_chat
+            msgs = [{"role": "user", "content": f"{prompt}\n\n(ملاحظة: تعذّر تحليل الملف بسبب quota)"}]
+            return await groq_chat(msgs, "llama")
+        raise Exception(f"Gemini file analysis error: {error_str}")
 
 async def gemini_edit_image(
     image_data: bytes,
     prompt: str,
     mime_type: str = "image/jpeg"
 ) -> str:
-    """تحليل الصورة وإعطاء تعليمات تعديل مفصلة"""
     try:
         import PIL.Image
         import io
         img = PIL.Image.open(io.BytesIO(image_data))
         mdl = genai.GenerativeModel(GEMINI_MODELS["flash"])
         edit_prompt = f"""أنت محرر صور محترف. المستخدم يريد: {prompt}
-        
+
 حلّل هذه الصورة بدقة واعطِ:
 1. وصف الصورة الحالية بالتفصيل
 2. برومبت احترافي بالإنجليزية لتوليد صورة معدّلة حسب طلب المستخدم
 3. اجعل البرومبت يحتفظ بعناصر الصورة الأصلية مع إضافة التعديلات المطلوبة
 
 أعطِ البرومبت فقط في السطر الأخير بعد كلمة PROMPT:"""
+
         response = mdl.generate_content([edit_prompt, img])
         return response.text
+
     except Exception as e:
-        raise Exception(f"Gemini edit image error: {str(e)}")
+        error_str = str(e)
+        if "429" in error_str or "quota" in error_str.lower():
+            # Fallback بدون الصورة
+            from services.groq_service import groq_chat
+            msgs = [{"role": "user", "content": f"""أنت محرر صور. المستخدم يريد: {prompt}
+اعطِ برومبت احترافي بالإنجليزية لتوليد هذه الصورة.
+أعطِ البرومبت فقط في السطر الأخير بعد كلمة PROMPT:"""}]
+            return await groq_chat(msgs, "llama")
+        raise Exception(f"Gemini edit image error: {error_str}")
 
 def get_gemini_models_list() -> list:
     return [{"id": k, "name": v, "provider": "Google"} for k, v in GEMINI_MODEL_NAMES.items()]

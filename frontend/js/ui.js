@@ -73,36 +73,30 @@ const UI = {
   translateUI(lang) {
     const translations = {
       ar: {
-        'nav-home':     'الرئيسية',
-        'nav-chat':     'المحادثة',
-        'nav-image':    'توليد الصور',
-        'nav-voice':    'الصوت',
-        'nav-video':    'الفيديو',
-        'nav-analyze':  'تحليل الملفات',
-        'nav-prompts':  'البرومبتات',
-        'nav-history':  'السجل',
-        'nav-settings': 'الإعدادات',
-        'nav-admin':    'لوحة الإدارة',
-        'nav-logout':   'خروج',
-        'home-subtitle': 'وش تبي تسوي اليوم؟',
-        'chat-placeholder': 'اكتب رسالتك هنا...',
-        'chat-empty': 'ابدأ محادثتك الآن',
+        'nav-home':    'الرئيسية',
+        'nav-chat':    'المحادثة',
+        'nav-image':   'توليد الصور',
+        'nav-voice':   'الصوت',
+        'nav-video':   'الفيديو',
+        'nav-analyze': 'تحليل الملفات',
+        'nav-prompts': 'البرومبتات',
+        'nav-history': 'السجل',
+        'nav-settings':'الإعدادات',
+        'nav-admin':   'لوحة الإدارة',
+        'nav-logout':  'خروج',
       },
       en: {
-        'nav-home':     'Home',
-        'nav-chat':     'Chat',
-        'nav-image':    'Image Gen',
-        'nav-voice':    'Voice',
-        'nav-video':    'Video',
-        'nav-analyze':  'Analyze',
-        'nav-prompts':  'Prompts',
-        'nav-history':  'History',
-        'nav-settings': 'Settings',
-        'nav-admin':    'Admin',
-        'nav-logout':   'Logout',
-        'home-subtitle': 'What would you like to do today?',
-        'chat-placeholder': 'Type your message here...',
-        'chat-empty': 'Start chatting now',
+        'nav-home':    'Home',
+        'nav-chat':    'Chat',
+        'nav-image':   'Image Gen',
+        'nav-voice':   'Voice',
+        'nav-video':   'Video',
+        'nav-analyze': 'Analyze',
+        'nav-prompts': 'Prompts',
+        'nav-history': 'History',
+        'nav-settings':'Settings',
+        'nav-admin':   'Admin',
+        'nav-logout':  'Logout',
       }
     };
 
@@ -114,12 +108,54 @@ const UI = {
       if (t[key]) el.textContent = t[key];
     });
 
-    // ترجمة placeholder
-    const chatInput = document.getElementById('chat-input');
-    if (chatInput) chatInput.placeholder = t['chat-placeholder'];
+    // ترجمة العناصر الثابتة
+    const staticTranslations = {
+      ar: {
+        'chat-input':          'اكتب رسالتك هنا...',
+        'image-prompt':        'صف الصورة اللي تبيها...',
+        'tts-text':            'اكتب النص...',
+        'analyze-prompt':      'ماذا تريد أن تعرف عن الملف؟ (اختياري)',
+        'lyrics-theme':        'مثال: الوطن والانتماء، الأم، الصداقة...',
+        'commercial-product':  'مثال: مطعم برغر الرياض، عطر ليلى...',
+      },
+      en: {
+        'chat-input':          'Type your message here...',
+        'image-prompt':        'Describe the image you want...',
+        'tts-text':            'Type the text...',
+        'analyze-prompt':      'What do you want to know about this file? (optional)',
+        'lyrics-theme':        'Example: patriotism, mother, friendship...',
+        'commercial-product':  'Example: burger restaurant, perfume, app...',
+      }
+    };
 
-    const subtitle = document.getElementById('home-subtitle-text');
-    if (subtitle) subtitle.textContent = t['home-subtitle'];
+    const st = staticTranslations[lang];
+    Object.entries(st).forEach(([id, placeholder]) => {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = placeholder;
+    });
+
+    // ترجمة العناوين والنصوص الثابتة
+    const pageTexts = {
+      ar: {
+        'home-subtitle-en': null,
+        '.home-subtitle':    'وش تبي تسوي اليوم؟',
+        '.page-subtitle':    null,
+      },
+      en: {
+        '.home-subtitle': 'What would you like to do today?',
+      }
+    };
+
+    const homeSubtitle = document.querySelector('.home-subtitle');
+    if (homeSubtitle) {
+      homeSubtitle.textContent = lang === 'ar' ? 'وش تبي تسوي اليوم؟' : 'What would you like to do today?';
+    }
+
+    // ترجمة أزرار الـ chat header
+    const chatControls = {
+      ar: { clear: '🗑️', search: '🔍' },
+      en: { clear: '🗑️', search: '🔍' }
+    };
   },
 
   // ─── Toast ────────────────────────────────────────────

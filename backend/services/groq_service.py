@@ -13,7 +13,7 @@ GROQ_MODELS = {
     "llama4":        "meta-llama/llama-4-scout-17b-16e-instruct",
     "gemma":         "gemma2-9b-it",
     "deepseek":      "deepseek-r1-distill-llama-70b",
-    "mistral":       "mistral-saba-24b",
+    "qwen":          "qwen-qwq-32b",
     "compound":      "compound-beta",
     "whisper":       "whisper-large-v3",
     "whisper_turbo": "whisper-large-v3-turbo",
@@ -25,7 +25,7 @@ GROQ_MODEL_NAMES = {
     "llama4":     "Llama 4 Scout (جديد)",
     "gemma":      "Gemma 2 9B",
     "deepseek":   "DeepSeek R1",
-    "mistral":    "Mistral Saba 24B (عربي)",
+    "qwen":       "Qwen QwQ 32B (عربي ممتاز)",
     "compound":   "Groq Compound",
 }
 
@@ -58,7 +58,7 @@ async def groq_chat_multi(
 ) -> dict:
     import asyncio
     if not models:
-        models = ["llama", "mistral", "gemma"]
+        models = ["llama", "qwen", "gemma"]
 
     async def single_chat(model):
         try:

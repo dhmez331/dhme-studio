@@ -78,10 +78,10 @@ async def get_models(user: dict = Depends(verify_token)):
     return {
         "models": gemini_models + groq_models,
         "collaboration_providers": [
-            {"id": "gemini_flash", "name": "Gemini 2.0 Flash"},
-            {"id": "gemini_pro", "name": "Gemini 1.5 Pro"},
-            {"id": "groq_llama", "name": "Llama 3.3 70B"},
-            {"id": "groq_mistral", "name": "Mistral Saba 24B"},
+            {"id": "gemini_flash",  "name": "Gemini 2.0 Flash"},
+            {"id": "gemini_pro",    "name": "Gemini 1.5 Pro"},
+            {"id": "groq_llama",    "name": "Llama 3.3 70B"},
+            {"id": "groq_qwen",     "name": "Qwen QwQ 32B (عربي ممتاز)"},
             {"id": "groq_deepseek", "name": "DeepSeek R1"},
         ]
     }

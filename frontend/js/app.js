@@ -106,18 +106,32 @@ const App = {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
 
-    // اسم المستخدم
     const el = document.getElementById('sidebar-username');
     if (el) el.textContent = this.state.username;
 
-    // زر الإدارة
     const adminNav = document.getElementById('admin-nav-item');
     if (adminNav) adminNav.style.display = this.state.isAdmin ? 'flex' : 'none';
 
-    // الصفحة الرئيسية
+    // ── تحديث اللوقو من localStorage ──
+    const savedLogo = localStorage.getItem('dhme_logo');
+    if (savedLogo) {
+      // تحديث كل عناصر اللوقو
+      document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
+        img.src = savedLogo;
+        img.style.display = 'block';
+      });
+      // تحديث الـ emoji في الـ sidebar إذا موجود
+      const sidebarLogoDiv = document.querySelector('.sidebar-logo');
+      if (sidebarLogoDiv) {
+        const emojiDiv = sidebarLogoDiv.querySelector('div[style*="font-size:1.6rem"]');
+        if (emojiDiv && savedLogo) {
+          emojiDiv.innerHTML = `<img src="${savedLogo}" style="width:36px;height:36px;border-radius:8px;" />`;
+        }
+      }
+    }
+
     this.navigate('home');
 
-    // الترحيب
     const greeting = document.getElementById('home-greeting');
     if (greeting) {
       const hour = new Date().getHours();
@@ -236,7 +250,6 @@ const Admin = {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        // ضغط الصورة
         const canvas = document.createElement('canvas');
         const MAX = 200;
         let w = img.width, h = img.height;
@@ -245,17 +258,31 @@ const Admin = {
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
         const compressed = canvas.toDataURL('image/png', 0.8);
+
+        // حفظ في localStorage
         localStorage.setItem('dhme_logo', compressed);
+
+        // تحديث كل عناصر اللوقو في الصفحة فوراً
         document.getElementById('current-logo').src = compressed;
         document.getElementById('current-logo').style.display = 'block';
-        // تحديث اللوقو في الـ sidebar
-        document.querySelectorAll('.logo-img').forEach(i => i.src = compressed);
+
+        // تحديث الـ sidebar
+        const sidebarLogoDiv = document.querySelector('.sidebar-logo');
+        if (sidebarLogoDiv) {
+          const emojiDiv = sidebarLogoDiv.querySelector('div');
+          if (emojiDiv) {
+            emojiDiv.innerHTML = `<img src="${compressed}" style="width:36px;height:36px;border-radius:8px;" />`;
+          }
+        }
+
         UI.toast('تم تحديث اللوقو ✅', 'success');
       };
       img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   },
+
+  
 
   loadStats() {
     const history = History.get();
