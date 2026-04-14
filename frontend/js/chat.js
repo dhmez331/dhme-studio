@@ -11,6 +11,36 @@ const Chat = {
   useSearch:        false,
   collaborationMode: null,  // null / 'compete' / 'collaborate'
 
+  notify(message, type = 'info') {
+    if (window.App && typeof App.toast === 'function') {
+      App.toast(message, type);
+      return;
+    }
+    if (window.UI && typeof UI.toast === 'function') {
+      UI.toast(message, type);
+      return;
+    }
+    console[type === 'error' ? 'error' : 'log'](message);
+  },
+
+  setSendLoading(loading) {
+    if (window.UI && typeof UI.setLoading === 'function') {
+      UI.setLoading('chat-send-btn', loading, '➤');
+      return;
+    }
+    const btn = document.getElementById('chat-send-btn');
+    if (!btn) return;
+    btn.disabled = !!loading;
+    btn.innerHTML = loading ? '<div class="spinner"></div>' : '➤';
+  },
+
+  format(text) {
+    if (window.UI && typeof UI.formatMarkdown === 'function') {
+      return UI.formatMarkdown(text);
+    }
+    return String(text || '').replace(/\n/g, '<br>');
+  },
+
   // ─── Send Message ────────────────────────────────────────
   async send() {
     const input = document.getElementById('chat-input');
@@ -26,7 +56,7 @@ const Chat = {
     // إظهار مؤشر الكتابة
     this.showTyping();
     this.isLoading = true;
-    UI.setLoading('chat-send-btn', true);
+    this.setSendLoading(true);
 
     try {
       const model = document.getElementById('chat-model').value;
@@ -78,10 +108,10 @@ const Chat = {
 
     } catch (e) {
       this.hideTyping();
-      UI.toast(e.message, 'error');
+      this.notify(e.message, 'error');
     } finally {
       this.isLoading = false;
-      UI.setLoading('chat-send-btn', false, '➤');
+      this.setSendLoading(false);
     }
   },
 
@@ -112,7 +142,7 @@ const Chat = {
             ${Object.entries(options.showIndividual).map(([name, resp]) => `
               <div style="background:var(--bg-hover); padding:10px; border-radius:8px; font-size:0.85rem;">
                 <strong style="color:var(--accent-1);">${name}:</strong>
-                <div style="margin-top:4px; color:var(--text-secondary);">${UI.formatMarkdown(resp)}</div>
+                <div style="margin-top:4px; color:var(--text-secondary);">${this.format(resp)}</div>
               </div>
             `).join('')}
           </div>
@@ -124,7 +154,7 @@ const Chat = {
       <div class="msg-avatar">${avatar}</div>
       <div style="flex:1; min-width:0;">
         ${options.label ? `<div style="font-size:0.75rem; color:var(--accent-1); margin-bottom:4px;">${options.label}</div>` : ''}
-        <div class="msg-bubble">${UI.formatMarkdown(content)}${extraContent}</div>
+        <div class="msg-bubble">${this.format(content)}${extraContent}</div>
         <div style="display:flex; gap:8px; margin-top:6px; justify-content:${isUser ? 'flex-end' : 'flex-start'};">
           ${!isUser ? `
             <button class="btn btn-ghost" style="font-size:0.75rem; padding:4px 8px;"
@@ -163,7 +193,7 @@ const Chat = {
                 <button class="btn btn-ghost" style="font-size:0.75rem; padding:4px 8px;"
                   onclick="UI.copy(\`${resp.replace(/`/g, '\\`')}\`)">نسخ</button>
               </div>
-              <div class="compete-response-body">${UI.formatMarkdown(resp)}</div>
+              <div class="compete-response-body">${this.format(resp)}</div>
             </div>
           `).join('')}
         </div>
@@ -217,7 +247,7 @@ const Chat = {
       btn.style.background = this.useSearch ? 'var(--accent-1)' : '';
       btn.style.color      = this.useSearch ? '#fff' : '';
     }
-    UI.toast(this.useSearch ? '🔍 البحث مفعّل' : '🔍 البحث معطّل', 'info');
+    this.notify(this.useSearch ? '🔍 البحث مفعّل' : '🔍 البحث معطّل', 'info');
   },
 
   clear() {
