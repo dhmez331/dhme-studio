@@ -200,8 +200,12 @@ const UI = {
 
   // ─── Toast ────────────────────────────────────────────
   toast(message, type = 'info', duration = 3000) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
     const icons = { success:'✅', error:'❌', info:'ℹ️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
