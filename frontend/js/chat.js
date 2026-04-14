@@ -10,6 +10,8 @@ const Chat = {
   isLoading:        false,
   useSearch:        false,
   collaborationMode: null,  // null / 'compete' / 'collaborate'
+  activeRequestController: null,
+  lastFailedText: null,
 
   notify(message, type = 'info') {
     if (window.App && typeof App.toast === 'function') {
@@ -41,22 +43,51 @@ const Chat = {
     return String(text || '').replace(/\n/g, '<br>');
   },
 
-  // ─── Send Message ────────────────────────────────────────
-  async send() {
+  getModelName(modelId) {
+    const sel = document.getElementById('chat-model');
+    if (!sel) return modelId;
+    const option = Array.from(sel.options).find(o => o.value === modelId);
+    return option ? option.textContent : modelId;
+  },
+
+  setStopVisible(visible) {
+    const btn = document.getElementById('chat-stop-btn');
+    if (!btn) return;
+    btn.style.display = visible ? 'inline-flex' : 'none';
+  },
+
+  stop() {
+    if (!this.isLoading || !this.activeRequestController) return;
+    this.activeRequestController.abort();
+  },
+
+  async send(rawText = null, opts = {}) {
     const input = document.getElementById('chat-input');
-    const text  = input.value.trim();
+    const text = (rawText ?? input?.value ?? '').trim();
+    const renderUser = opts.renderUser !== false;
     if (!text || this.isLoading) return;
 
+    if (renderUser && text.startsWith('/')) {
+      this.runCommand(text, input);
+      return;
+    }
+
     // إضافة رسالة المستخدم
-    this.messages.push({ role: 'user', content: text });
-    this.renderMessage('user', text);
-    input.value = '';
-    this.autoResize(input);
+    if (renderUser) {
+      this.messages.push({ role: 'user', content: text });
+      this.renderMessage('user', text);
+      if (input) {
+        input.value = '';
+        this.autoResize(input);
+      }
+    }
 
     // إظهار مؤشر الكتابة
     this.showTyping();
     this.isLoading = true;
     this.setSendLoading(true);
+    this.setStopVisible(true);
+    this.activeRequestController = new AbortController();
 
     try {
       const model = document.getElementById('chat-model').value;
@@ -79,8 +110,11 @@ const Chat = {
         ] : null,
       };
 
-      const data = await App.apiJSON('/api/chat/', payload);
+      const data = await App.apiJSON('/api/chat/', payload, 'POST', {
+        signal: this.activeRequestController.signal
+      });
       this.hideTyping();
+      this.lastFailedText = null;
 
       // ─── وضع المنافسة ──────────────────────────────────
       if (data.mode === 'compete') {
@@ -107,7 +141,9 @@ const Chat = {
       }
       // ─── نموذج واحد ────────────────────────────────────
       else {
-        this.renderMessage('ai', data.response);
+        this.renderMessage('ai', data.response, {
+          label: `🤖 ${this.getModelName(data.model || model)}`
+        });
         this.messages.push({ role: 'assistant', content: data.response });
 
         // حفظ في السجل
@@ -116,10 +152,60 @@ const Chat = {
 
     } catch (e) {
       this.hideTyping();
-      this.notify(e.message, 'error');
+      if (e?.name === 'AbortError') {
+        this.notify('تم إيقاف التوليد', 'info');
+      } else {
+        this.lastFailedText = text;
+        this.notify(e.message, 'error');
+        this.renderMessage('ai', `تعذر الحصول على الرد: ${e.message}`, {
+          label: '⚠️ خطأ في الإرسال',
+          retry: true
+        });
+      }
     } finally {
       this.isLoading = false;
+      this.activeRequestController = null;
       this.setSendLoading(false);
+      this.setStopVisible(false);
+    }
+  },
+
+  retryLast() {
+    if (!this.lastFailedText) return;
+    this.send(this.lastFailedText, { renderUser: false });
+  },
+
+  runCommand(commandText, inputEl) {
+    const [cmd, ...args] = commandText.slice(1).trim().split(/\s+/);
+    const arg = (args[0] || '').toLowerCase();
+
+    if (cmd === 'clear') {
+      this.clear();
+      this.notify('تم مسح المحادثة', 'info');
+    } else if (cmd === 'search') {
+      if (arg === 'on') this.useSearch = false;
+      if (arg === 'off') this.useSearch = true;
+      this.toggleSearch();
+    } else if (cmd === 'model') {
+      const modelId = args.join('_');
+      const sel = document.getElementById('chat-model');
+      if (!sel) return;
+      const option = Array.from(sel.options).find(o => o.value === modelId);
+      if (!option) {
+        this.notify(`النموذج غير موجود: ${modelId}`, 'error');
+      } else {
+        sel.value = modelId;
+        this.notify(`تم اختيار: ${option.textContent}`, 'success');
+      }
+    } else if (cmd === 'help') {
+      this.notify('الأوامر: /clear - /search on|off - /model <id> - /help', 'info');
+    } else {
+      this.notify('أمر غير معروف. استخدم /help', 'error');
+    }
+
+    if (inputEl) {
+      inputEl.value = '';
+      this.autoResize(inputEl);
     }
   },
 
@@ -167,6 +253,10 @@ const Chat = {
           ${!isUser ? `
             <button class="btn btn-ghost" style="font-size:0.75rem; padding:4px 8px;"
               onclick="UI.copy(\`${content.replace(/`/g, '\\`')}\`)">نسخ</button>
+            ${options.retry ? `
+              <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;"
+                onclick="Chat.retryLast()">إعادة المحاولة</button>
+            ` : ''}
           ` : ''}
         </div>
       </div>
@@ -201,7 +291,10 @@ const Chat = {
                 <button class="btn btn-ghost" style="font-size:0.75rem; padding:4px 8px;"
                   onclick="UI.copy(\`${resp.replace(/`/g, '\\`')}\`)">نسخ</button>
               </div>
-              <div class="compete-response-body">${this.format(resp)}</div>
+              <div class="compete-response-body">
+                ${String(resp || '').startsWith('خطأ:') ? `<div style="color:#ef4444;font-size:0.8rem;margin-bottom:6px;">❌ فشل الرد</div>` : `<div style="color:#22c55e;font-size:0.8rem;margin-bottom:6px;">✅ استجاب</div>`}
+                ${this.format(resp)}
+              </div>
             </div>
           `).join('')}
         </div>
