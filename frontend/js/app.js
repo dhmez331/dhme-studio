@@ -287,18 +287,20 @@ const App = {
     return res;
   },
 
-  async apiJSON(endpoint, data = {}, method = 'POST') {
+  async apiJSON(endpoint, data = {}, method = 'POST', extraOptions = {}) {
     const res = await this.api(endpoint, {
       method,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      ...extraOptions
     });
     return res.json();
   },
 
-  async apiBlob(endpoint, data = {}, method = 'POST') {
+  async apiBlob(endpoint, data = {}, method = 'POST', extraOptions = {}) {
     const res = await this.api(endpoint, {
       method,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      ...extraOptions
     });
     return res.blob();
   },

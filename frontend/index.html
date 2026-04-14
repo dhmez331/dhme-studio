@@ -255,6 +255,10 @@
             placeholder="اكتب رسالتك هنا..." rows="1"
             onkeydown="Chat.handleKey(event)"
             oninput="Chat.autoResize(this)"></textarea>
+          <button class="btn btn-secondary btn-icon" onclick="Chat.stop()" id="chat-stop-btn"
+            title="إيقاف التوليد" style="display:none;">
+            ⏹️
+          </button>
           <button class="btn btn-primary btn-icon" onclick="Chat.send()" id="chat-send-btn">
             ➤
           </button>
