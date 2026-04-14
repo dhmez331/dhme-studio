@@ -11,8 +11,6 @@ GROQ_MODELS = {
     "llama":         "llama-3.3-70b-versatile",
     "llama_fast":    "llama-3.1-8b-instant",
     "llama4":        "meta-llama/llama-4-scout-17b-16e-instruct",
-    "gemma":         "gemma2-9b-it",
-    "deepseek":      "deepseek-r1-distill-llama-70b",
     "qwen":          "qwen-qwq-32b",
     "compound":      "compound-beta",
     "whisper":       "whisper-large-v3",
@@ -23,8 +21,6 @@ GROQ_MODEL_NAMES = {
     "llama":      "Llama 3.3 70B",
     "llama_fast": "Llama 3.1 8B (سريع)",
     "llama4":     "Llama 4 Scout (جديد)",
-    "gemma":      "Gemma 2 9B",
-    "deepseek":   "DeepSeek R1",
     "qwen":       "Qwen QwQ 32B (عربي ممتاز)",
     "compound":   "Groq Compound",
 }
@@ -32,6 +28,9 @@ GROQ_MODEL_NAMES = {
 GROQ_MODEL_ALIASES = {
     # توافق مع أي عميل قديم ما زال يرسل mistral
     "mistral": "qwen",
+    # نماذج تم إيقافها في Groq
+    "deepseek": "qwen",
+    "gemma": "qwen",
 }
 
 async def groq_chat(
@@ -40,13 +39,12 @@ async def groq_chat(
     system_prompt: str = None
 ) -> str:
     resolved_model = GROQ_MODEL_ALIASES.get(model, model)
+    formatted = []
+    if system_prompt:
+        formatted.append({"role": "system", "content": system_prompt})
+    formatted.extend(messages)
     try:
         model_id = GROQ_MODELS.get(resolved_model, GROQ_MODELS["llama"])
-        formatted = []
-        if system_prompt:
-            formatted.append({"role": "system", "content": system_prompt})
-        formatted.extend(messages)
-
         response = client.chat.completions.create(
             model=model_id,
             messages=formatted,
@@ -55,18 +53,20 @@ async def groq_chat(
         )
         return response.choices[0].message.content
     except Exception as e:
-        # fallback تلقائي لأي نموذج Groq غير متاح حالياً
-        if resolved_model != "llama":
+        # fallback متعدد لتفادي rate-limit أو decommission
+        fallback_order = ["qwen", "llama4", "llama_fast", "compound", "llama"]
+        fallback_models = [m for m in fallback_order if m != resolved_model and m in GROQ_MODELS]
+        for fallback in fallback_models:
             try:
                 fallback_response = client.chat.completions.create(
-                    model=GROQ_MODELS["llama"],
+                    model=GROQ_MODELS[fallback],
                     messages=formatted,
                     max_tokens=4096,
                     temperature=0.7
                 )
                 return fallback_response.choices[0].message.content
             except Exception:
-                pass
+                continue
         raise Exception(f"Groq error ({resolved_model}): {str(e)}")
 
 async def groq_chat_multi(
@@ -76,7 +76,7 @@ async def groq_chat_multi(
 ) -> dict:
     import asyncio
     if not models:
-        models = ["llama", "qwen", "gemma"]
+        models = ["llama", "qwen", "llama4"]
 
     async def single_chat(model):
         try:

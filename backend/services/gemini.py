@@ -59,7 +59,7 @@ async def gemini_chat(
             or "invalid argument" in error_lower
         ):
             from services.groq_service import groq_chat
-            return await groq_chat(messages, "llama", system_prompt)
+            return await groq_chat(messages, "qwen", system_prompt)
         raise Exception(f"Gemini error ({model}): {error_str}")
 
 async def gemini_chat_multi(
