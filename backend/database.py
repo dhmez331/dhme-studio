@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+
 # ─── Supabase Setup ──────────────────────────────────────
 # سنفعّله بعد ما تنشئ Supabase project
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
