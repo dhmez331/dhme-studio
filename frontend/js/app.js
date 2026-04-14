@@ -14,10 +14,21 @@ const App = {
     apiBase:     'https://dhme-studio-api1.onrender.com',
   },
 
+  toast(message, type = 'info') {
+    if (window.UI && typeof UI.toast === 'function') {
+      UI.toast(message, type);
+      return;
+    }
+    // fallback آمن إذا ui.js ما انحمّل
+    console[type === 'error' ? 'error' : 'log'](message);
+  },
+
   // ─── Init ───────────────────────────────────────────────
   init() {
     // تحميل الإعدادات
-    try { UI.loadSettings(); } catch(e) { console.warn('UI load error:', e); }
+    try {
+      if (window.UI && typeof UI.loadSettings === 'function') UI.loadSettings();
+    } catch(e) { console.warn('UI load error:', e); }
 
     // التحقق من الجلسة المحفوظة
     const savedToken    = localStorage.getItem('dhme_token');
@@ -50,11 +61,11 @@ const App = {
 
     if (!username) {
       this.setLoginStatus('أدخل اسم المستخدم أولاً', 'error');
-      return UI.toast('أدخل اسمك', 'error');
+      return this.toast('أدخل اسمك', 'error');
     }
     if (!code) {
       this.setLoginStatus('أدخل كود الدعوة أولاً', 'error');
-      return UI.toast('أدخل كود الدعوة', 'error');
+      return this.toast('أدخل كود الدعوة', 'error');
     }
 
     const btn = document.getElementById('login-btn');
@@ -92,7 +103,7 @@ const App = {
       this.saveRememberedLogin(username, code, remember);
 
       this.setLoginStatus(`تم تسجيل الدخول بنجاح كـ ${data.username}`, 'success');
-      UI.toast(`أهلاً ${data.username}! 🎉`, 'success');
+      this.toast(`أهلاً ${data.username}! 🎉`, 'success');
       this.showApp();
 
     } catch (e) {
@@ -100,7 +111,7 @@ const App = {
         ? 'انتهت مهلة الاتصال بالسيرفر، حاول مرة أخرى'
         : (e?.message || 'تعذر تسجيل الدخول');
       this.setLoginStatus(msg, 'error');
-      UI.toast(msg, 'error');
+      this.toast(msg, 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span>دخول</span><span>🚀</span>';
@@ -168,7 +179,7 @@ const App = {
     this.state.username = null;
     this.state.isAdmin  = false;
     this.showLogin();
-    UI.toast('تم تسجيل الخروج', 'info');
+    this.toast('تم تسجيل الخروج', 'info');
   },
 
   // ─── Show/Hide ──────────────────────────────────────────
@@ -308,7 +319,7 @@ const Admin = {
   init() {
     if (!App.state.isAdmin) {
       App.navigate('home');
-      UI.toast('هذه الصفحة للمدير فقط', 'error');
+      App.toast('هذه الصفحة للمدير فقط', 'error');
       return;
     }
     this.loadStats();
@@ -325,8 +336,8 @@ const Admin = {
   uploadLogo(event) {
     const file = event.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) return UI.toast('يجب أن يكون الملف صورة', 'error');
-    if (file.size > 2 * 1024 * 1024) return UI.toast('الصورة أكبر من 2MB', 'error');
+    if (!file.type.startsWith('image/')) return App.toast('يجب أن يكون الملف صورة', 'error');
+    if (file.size > 2 * 1024 * 1024) return App.toast('الصورة أكبر من 2MB', 'error');
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -347,7 +358,7 @@ const Admin = {
         // تحديث كل عناصر اللوقو في الصفحة فوراً
         App.applyLogo(compressed);
 
-        UI.toast('تم تحديث اللوقو ✅', 'success');
+        App.toast('تم تحديث اللوقو ✅', 'success');
       };
       img.src = e.target.result;
     };
@@ -434,13 +445,13 @@ const Admin = {
       () => {
         const user = document.getElementById('new-code-user').value.trim();
         const type = document.getElementById('new-code-type').value;
-        if (!user) return UI.toast('أدخل اسم المستخدم', 'error');
+        if (!user) return App.toast('أدخل اسم المستخدم', 'error');
         const code = 'dhme_' + Math.random().toString(36).substr(2, 8);
         const codes = this.getCodes();
         codes.push({ code, user, type, custom: true });
         this.saveCodes(codes);
         this.loadInviteCodes();
-        UI.toast(`تم إنشاء الكود: ${code}`, 'success');
+        App.toast(`تم إنشاء الكود: ${code}`, 'success');
       }
     );
   },
@@ -449,7 +460,7 @@ const Admin = {
     const codes = this.getCodes().filter(c => c.code !== code);
     this.saveCodes(codes);
     this.loadInviteCodes();
-    UI.toast('تم حذف الكود', 'info');
+    App.toast('تم حذف الكود', 'info');
   },
 };
 // ─── Enter key للـ Login ─────────────────────────────────
