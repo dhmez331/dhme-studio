@@ -14,10 +14,21 @@ const App = {
     apiBase:     'https://dhme-studio-api1.onrender.com',
   },
 
+  toast(message, type = 'info') {
+    if (window.UI && typeof UI.toast === 'function') {
+      UI.toast(message, type);
+      return;
+    }
+    // fallback آمن إذا ui.js ما انحمّل
+    console[type === 'error' ? 'error' : 'log'](message);
+  },
+
   // ─── Init ───────────────────────────────────────────────
   init() {
     // تحميل الإعدادات
-    try { UI.loadSettings(); } catch(e) { console.warn('UI load error:', e); }
+    try {
+      if (window.UI && typeof UI.loadSettings === 'function') UI.loadSettings();
+    } catch(e) { console.warn('UI load error:', e); }
 
     // التحقق من الجلسة المحفوظة
     const savedToken    = localStorage.getItem('dhme_token');
@@ -31,6 +42,7 @@ const App = {
       this.showApp();
     } else {
       this.showLogin();
+      this.loadRememberedLogin();
     }
 
     // إخفاء شاشة التحميل
@@ -41,26 +53,42 @@ const App = {
   },
 
   // ─── Login ──────────────────────────────────────────────
-  async login() {
+  async login(event = null) {
+    if (event?.preventDefault) event.preventDefault();
     const username = document.getElementById('login-username').value.trim();
     const code     = document.getElementById('login-code').value.trim();
+    const remember = document.getElementById('login-remember')?.checked ?? true;
 
-    if (!username) return UI.toast('أدخل اسمك', 'error');
-    if (!code)     return UI.toast('أدخل كود الدعوة', 'error');
+    if (!username) {
+      this.setLoginStatus('أدخل اسم المستخدم أولاً', 'error');
+      return this.toast('أدخل اسمك', 'error');
+    }
+    if (!code) {
+      this.setLoginStatus('أدخل كود الدعوة أولاً', 'error');
+      return this.toast('أدخل كود الدعوة', 'error');
+    }
 
     const btn = document.getElementById('login-btn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div>';
+    this.setLoginStatus('جاري تسجيل الدخول...', 'info');
 
     try {
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 20000);
       const res = await fetch(
         `${this.state.apiBase}/api/chat/login?invite_code=${encodeURIComponent(code)}&username=${encodeURIComponent(username)}`,
-        { method: 'POST' }
+        { method: 'POST', signal: ctrl.signal }
       );
+      clearTimeout(timeout);
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || 'فشل تسجيل الدخول');
+        let msg = 'فشل تسجيل الدخول';
+        try {
+          const err = await res.json();
+          msg = err.detail || err.message || msg;
+        } catch (_) {}
+        throw new Error(msg);
       }
 
       const data = await res.json();
@@ -72,16 +100,74 @@ const App = {
       localStorage.setItem('dhme_token',    data.token);
       localStorage.setItem('dhme_username', data.username);
       localStorage.setItem('dhme_is_admin', data.is_admin);
+      this.saveRememberedLogin(username, code, remember);
 
-      UI.toast(`أهلاً ${data.username}! 🎉`, 'success');
+      this.setLoginStatus(`تم تسجيل الدخول بنجاح كـ ${data.username}`, 'success');
+      this.toast(`أهلاً ${data.username}! 🎉`, 'success');
       this.showApp();
 
     } catch (e) {
-      UI.toast(e.message, 'error');
+      const msg = e?.name === 'AbortError'
+        ? 'انتهت مهلة الاتصال بالسيرفر، حاول مرة أخرى'
+        : (e?.message || 'تعذر تسجيل الدخول');
+      this.setLoginStatus(msg, 'error');
+      this.toast(msg, 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span>دخول</span><span>🚀</span>';
     }
+  },
+
+  setLoginStatus(message = '', type = 'info') {
+    const el = document.getElementById('login-status');
+    if (!el) return;
+    if (!message) {
+      el.style.display = 'none';
+      el.textContent = '';
+      return;
+    }
+    const colors = {
+      success: '#22c55e',
+      error: '#ef4444',
+      info: 'var(--text-secondary)'
+    };
+    el.style.display = 'block';
+    el.style.color = colors[type] || colors.info;
+    el.textContent = message;
+  },
+
+  toggleLoginCodeVisibility() {
+    const codeInput = document.getElementById('login-code');
+    const toggleBtn = document.getElementById('login-toggle-code');
+    if (!codeInput || !toggleBtn) return;
+    const isHidden = codeInput.type === 'password';
+    codeInput.type = isHidden ? 'text' : 'password';
+    toggleBtn.textContent = isHidden ? '🙈' : '👁️';
+    toggleBtn.title = isHidden ? 'إخفاء الكود' : 'إظهار الكود';
+  },
+
+  saveRememberedLogin(username, inviteCode, remember) {
+    if (remember) {
+      localStorage.setItem('dhme_login_username', username);
+      localStorage.setItem('dhme_login_code', inviteCode);
+      localStorage.setItem('dhme_login_remember', 'true');
+      return;
+    }
+    localStorage.removeItem('dhme_login_username');
+    localStorage.removeItem('dhme_login_code');
+    localStorage.setItem('dhme_login_remember', 'false');
+  },
+
+  loadRememberedLogin() {
+    const remember = localStorage.getItem('dhme_login_remember');
+    const remembered = remember !== 'false';
+    const usernameEl = document.getElementById('login-username');
+    const codeEl = document.getElementById('login-code');
+    const rememberEl = document.getElementById('login-remember');
+    if (rememberEl) rememberEl.checked = remembered;
+    if (!remembered) return;
+    if (usernameEl) usernameEl.value = localStorage.getItem('dhme_login_username') || '';
+    if (codeEl) codeEl.value = localStorage.getItem('dhme_login_code') || '';
   },
 
   // ─── Logout ─────────────────────────────────────────────
@@ -93,13 +179,32 @@ const App = {
     this.state.username = null;
     this.state.isAdmin  = false;
     this.showLogin();
-    UI.toast('تم تسجيل الخروج', 'info');
+    this.toast('تم تسجيل الخروج', 'info');
   },
 
   // ─── Show/Hide ──────────────────────────────────────────
   showLogin() {
     document.getElementById('login-page').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
+    this.loadRememberedLogin();
+    this.setLoginStatus('');
+  },
+
+  applyLogo(logoData) {
+    if (!logoData) return;
+
+    document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
+      img.src = logoData;
+      img.style.display = 'block';
+    });
+
+    const sidebarLogoDiv = document.querySelector('.sidebar-logo');
+    if (sidebarLogoDiv) {
+      const iconContainer = sidebarLogoDiv.querySelector('div');
+      if (iconContainer) {
+        iconContainer.innerHTML = `<img src="${logoData}" style="width:36px;height:36px;border-radius:8px;" />`;
+      }
+    }
   },
 
   showApp() {
@@ -115,19 +220,7 @@ const App = {
     // ── تحديث اللوقو من localStorage ──
     const savedLogo = localStorage.getItem('dhme_logo');
     if (savedLogo) {
-      // تحديث كل عناصر اللوقو
-      document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
-        img.src = savedLogo;
-        img.style.display = 'block';
-      });
-      // تحديث الـ emoji في الـ sidebar إذا موجود
-      const sidebarLogoDiv = document.querySelector('.sidebar-logo');
-      if (sidebarLogoDiv) {
-        const emojiDiv = sidebarLogoDiv.querySelector('div[style*="font-size:1.6rem"]');
-        if (emojiDiv && savedLogo) {
-          emojiDiv.innerHTML = `<img src="${savedLogo}" style="width:36px;height:36px;border-radius:8px;" />`;
-        }
-      }
+      this.applyLogo(savedLogo);
     }
 
     this.navigate('home');
@@ -226,7 +319,7 @@ const Admin = {
   init() {
     if (!App.state.isAdmin) {
       App.navigate('home');
-      UI.toast('هذه الصفحة للمدير فقط', 'error');
+      App.toast('هذه الصفحة للمدير فقط', 'error');
       return;
     }
     this.loadStats();
@@ -243,8 +336,8 @@ const Admin = {
   uploadLogo(event) {
     const file = event.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) return UI.toast('يجب أن يكون الملف صورة', 'error');
-    if (file.size > 2 * 1024 * 1024) return UI.toast('الصورة أكبر من 2MB', 'error');
+    if (!file.type.startsWith('image/')) return App.toast('يجب أن يكون الملف صورة', 'error');
+    if (file.size > 2 * 1024 * 1024) return App.toast('الصورة أكبر من 2MB', 'error');
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -263,19 +356,9 @@ const Admin = {
         localStorage.setItem('dhme_logo', compressed);
 
         // تحديث كل عناصر اللوقو في الصفحة فوراً
-        document.getElementById('current-logo').src = compressed;
-        document.getElementById('current-logo').style.display = 'block';
+        App.applyLogo(compressed);
 
-        // تحديث الـ sidebar
-        const sidebarLogoDiv = document.querySelector('.sidebar-logo');
-        if (sidebarLogoDiv) {
-          const emojiDiv = sidebarLogoDiv.querySelector('div');
-          if (emojiDiv) {
-            emojiDiv.innerHTML = `<img src="${compressed}" style="width:36px;height:36px;border-radius:8px;" />`;
-          }
-        }
-
-        UI.toast('تم تحديث اللوقو ✅', 'success');
+        App.toast('تم تحديث اللوقو ✅', 'success');
       };
       img.src = e.target.result;
     };
@@ -362,13 +445,13 @@ const Admin = {
       () => {
         const user = document.getElementById('new-code-user').value.trim();
         const type = document.getElementById('new-code-type').value;
-        if (!user) return UI.toast('أدخل اسم المستخدم', 'error');
+        if (!user) return App.toast('أدخل اسم المستخدم', 'error');
         const code = 'dhme_' + Math.random().toString(36).substr(2, 8);
         const codes = this.getCodes();
         codes.push({ code, user, type, custom: true });
         this.saveCodes(codes);
         this.loadInviteCodes();
-        UI.toast(`تم إنشاء الكود: ${code}`, 'success');
+        App.toast(`تم إنشاء الكود: ${code}`, 'success');
       }
     );
   },
@@ -377,7 +460,7 @@ const Admin = {
     const codes = this.getCodes().filter(c => c.code !== code);
     this.saveCodes(codes);
     this.loadInviteCodes();
-    UI.toast('تم حذف الكود', 'info');
+    App.toast('تم حذف الكود', 'info');
   },
 };
 // ─── Enter key للـ Login ─────────────────────────────────
@@ -385,6 +468,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     const loginPage = document.getElementById('login-page');
     if (loginPage && loginPage.style.display !== 'none') {
+      const active = document.activeElement;
+      if (active && active.id === 'login-code') {
+        e.preventDefault();
+      }
       App.login();
     }
   }

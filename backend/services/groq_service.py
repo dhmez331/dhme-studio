@@ -29,13 +29,19 @@ GROQ_MODEL_NAMES = {
     "compound":   "Groq Compound",
 }
 
+GROQ_MODEL_ALIASES = {
+    # توافق مع أي عميل قديم ما زال يرسل mistral
+    "mistral": "qwen",
+}
+
 async def groq_chat(
     messages: list,
     model: str = "llama",
     system_prompt: str = None
 ) -> str:
+    resolved_model = GROQ_MODEL_ALIASES.get(model, model)
     try:
-        model_id = GROQ_MODELS.get(model, GROQ_MODELS["llama"])
+        model_id = GROQ_MODELS.get(resolved_model, GROQ_MODELS["llama"])
         formatted = []
         if system_prompt:
             formatted.append({"role": "system", "content": system_prompt})
@@ -49,7 +55,19 @@ async def groq_chat(
         )
         return response.choices[0].message.content
     except Exception as e:
-        raise Exception(f"Groq error ({model}): {str(e)}")
+        # fallback تلقائي لأي نموذج Groq غير متاح حالياً
+        if resolved_model != "llama":
+            try:
+                fallback_response = client.chat.completions.create(
+                    model=GROQ_MODELS["llama"],
+                    messages=formatted,
+                    max_tokens=4096,
+                    temperature=0.7
+                )
+                return fallback_response.choices[0].message.content
+            except Exception:
+                pass
+        raise Exception(f"Groq error ({resolved_model}): {str(e)}")
 
 async def groq_chat_multi(
     messages: list,

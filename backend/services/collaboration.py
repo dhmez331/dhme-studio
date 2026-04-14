@@ -20,7 +20,7 @@ async def collaborate_chat(
     from services.groq_service import groq_chat, groq_chat_multi
 
     if providers is None:
-        providers = ["gemini_flash", "groq_llama", "groq_mistral"]
+        providers = ["gemini_flash", "groq_llama", "groq_qwen"]
 
     # ─── وضع المنافسة — كل نموذج يجاوب لوحده ─────────────
     if mode == "compete":
@@ -40,9 +40,6 @@ async def collaborate_chat(
                 elif provider == "groq_llama":
                     r = await groq_chat(messages, "llama", system_prompt)
                     return "Llama 3.3 70B", r
-                elif provider == "groq_mistral":
-                    r = await groq_chat(messages, "mistral", system_prompt)
-                    return "Mistral Saba 24B", r
                 elif provider == "groq_deepseek":
                     r = await groq_chat(messages, "deepseek", system_prompt)
                     return "DeepSeek R1", r
@@ -107,7 +104,7 @@ async def collaborate_image(
           'collaborate' = نموذج نصي يحسّن البرومبت أولاً
     """
     from services.huggingface import generate_image
-    from services.gemini import imagen_generate, gemini_chat
+    from services.gemini import gemini_chat
 
     final_prompt = prompt
 
@@ -193,7 +190,7 @@ async def collaborate_search(
         return await gemini_chat(msgs, "flash", system)
 
     async def analyze_groq():
-        return await groq_chat(msgs, "mistral", system)
+        return await groq_chat(msgs, "qwen", system)
 
     gemini_r, groq_r = await asyncio.gather(analyze_gemini(), analyze_groq())
 
@@ -203,7 +200,7 @@ async def collaborate_search(
 
 التحليل الأول (Gemini): {gemini_r}
 
-التحليل الثاني (Mistral): {groq_r}
+التحليل الثاني (Qwen): {groq_r}
 
 اكتب إجابة مدمجة نهائية:
 """}]
@@ -214,6 +211,6 @@ async def collaborate_search(
         "query": query,
         "search_results": search_results,
         "gemini_analysis": gemini_r,
-        "mistral_analysis": groq_r,
+        "qwen_analysis": groq_r,
         "merged_answer": merged
     }

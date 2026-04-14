@@ -134,34 +134,78 @@ const UI = {
       if (el) el.placeholder = placeholder;
     });
 
-    // ترجمة العناوين والنصوص الثابتة
-    const pageTexts = {
+    const setText = (selector, value) => {
+      const el = document.querySelector(selector);
+      if (el && value) el.textContent = value;
+    };
+
+    // ترجمة عناوين وأوصاف الصفحة الرئيسية
+    const homeCards = {
+      ar: [
+        { name: 'المحادثة الذكية', desc: 'تحدث مع أذكى نماذج AI — مع بحث في الإنترنت' },
+        { name: 'توليد الصور', desc: 'حوّل أفكارك لصور احترافية بـ FLUX و Imagen' },
+        { name: 'الصوت والتحويل', desc: 'نص لصوت + تفريغ صوتي بأفضل الأصوات' },
+        { name: 'توليد الفيديو', desc: 'حوّل نصك لفيديو — قريباً' },
+        { name: 'تحليل الملفات', desc: 'حلّل صور وفيديو وصوت بدقة عالية' },
+        { name: 'مكتبة البرومبتات', desc: 'برومبتات جاهزة + أضف برومبتاتك الخاصة' },
+      ],
+      en: [
+        { name: 'Smart Chat', desc: 'Chat with top AI models with web search support' },
+        { name: 'Image Generation', desc: 'Turn your ideas into pro images with FLUX and Imagen' },
+        { name: 'Voice Tools', desc: 'Text-to-speech and speech-to-text with quality voices' },
+        { name: 'Video Generation', desc: 'Turn text into video — coming soon' },
+        { name: 'File Analysis', desc: 'Analyze images, video, and audio with AI' },
+        { name: 'Prompt Library', desc: 'Ready prompts plus your custom prompts' },
+      ]
+    };
+
+    const names = document.querySelectorAll('#page-home .tool-name');
+    const descs = document.querySelectorAll('#page-home .tool-desc');
+    homeCards[lang].forEach((card, i) => {
+      if (names[i]) names[i].textContent = card.name;
+      if (descs[i]) descs[i].textContent = card.desc;
+    });
+
+    // ترجمة العناوين الأساسية
+    setText('.home-subtitle', lang === 'ar' ? 'وش تبي تسوي اليوم؟' : 'What would you like to do today?');
+    setText('#page-chat .chat-title', lang === 'ar' ? '💬 المحادثة الذكية' : '💬 Smart Chat');
+
+    const pageTitles = document.querySelectorAll('.page-title');
+    const pageTitleText = lang === 'ar'
+      ? ['🖼️ توليد الصور', '🎤 الصوت والتحويل', '🎬 توليد الفيديو', '🔍 تحليل الملفات', '✨ مكتبة البرومبتات', '📋 السجل والمفضلة', '⚙️ الإعدادات', '👑 لوحة الإدارة']
+      : ['🖼️ Image Generation', '🎤 Voice Tools', '🎬 Video Generation', '🔍 File Analysis', '✨ Prompt Library', '📋 History & Favorites', '⚙️ Settings', '👑 Admin Panel'];
+    pageTitles.forEach((el, i) => {
+      if (pageTitleText[i]) el.textContent = pageTitleText[i];
+    });
+
+    // ترجمة بعض الأزرار الثابتة
+    const labels = {
       ar: {
-        'home-subtitle-en': null,
-        '.home-subtitle':    'وش تبي تسوي اليوم؟',
-        '.page-subtitle':    null,
+        '#image-gen-btn span:first-child': 'توليد',
+        '#tts-btn span:first-child': 'توليد الصوت',
+        '#lyrics-btn span:first-child': 'توليد',
+        '#commercial-btn span:first-child': 'توليد الإعلان',
+        '#analyze-btn span:first-child': 'تحليل الآن',
       },
       en: {
-        '.home-subtitle': 'What would you like to do today?',
+        '#image-gen-btn span:first-child': 'Generate',
+        '#tts-btn span:first-child': 'Generate Audio',
+        '#lyrics-btn span:first-child': 'Generate',
+        '#commercial-btn span:first-child': 'Generate Ad',
+        '#analyze-btn span:first-child': 'Analyze Now',
       }
     };
-
-    const homeSubtitle = document.querySelector('.home-subtitle');
-    if (homeSubtitle) {
-      homeSubtitle.textContent = lang === 'ar' ? 'وش تبي تسوي اليوم؟' : 'What would you like to do today?';
-    }
-
-    // ترجمة أزرار الـ chat header
-    const chatControls = {
-      ar: { clear: '🗑️', search: '🔍' },
-      en: { clear: '🗑️', search: '🔍' }
-    };
+    Object.entries(labels[lang]).forEach(([selector, value]) => setText(selector, value));
   },
 
   // ─── Toast ────────────────────────────────────────────
   toast(message, type = 'info', duration = 3000) {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
     const icons = { success:'✅', error:'❌', info:'ℹ️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -240,4 +284,5 @@ const UI = {
     this.download(url, filename);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
+};
 };
