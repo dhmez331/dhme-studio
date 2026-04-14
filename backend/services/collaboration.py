@@ -28,8 +28,8 @@ async def collaborate_chat(
             "groq_llama",
             "groq_llama4",
             "groq_qwen",
-            "groq_deepseek",
-            "groq_gemma",
+            "groq_llama_fast",
+            "groq_compound",
         ]
 
     # ─── وضع المنافسة — كل نموذج يجاوب لوحده ─────────────
@@ -56,15 +56,15 @@ async def collaborate_chat(
                 elif provider == "groq_llama4":
                     r = await groq_chat(messages, "llama4", system_prompt)
                     return "Llama 4 Scout", r
-                elif provider == "groq_deepseek":
-                    r = await groq_chat(messages, "deepseek", system_prompt)
-                    return "DeepSeek R1", r
                 elif provider == "groq_qwen":
                     r = await groq_chat(messages, "qwen", system_prompt)
                     return "Qwen QwQ 32B", r
-                elif provider == "groq_gemma":
-                    r = await groq_chat(messages, "gemma", system_prompt)
-                    return "Gemma 2 9B", r
+                elif provider == "groq_llama_fast":
+                    r = await groq_chat(messages, "llama_fast", system_prompt)
+                    return "Llama 3.1 8B (Fast)", r
+                elif provider == "groq_compound":
+                    r = await groq_chat(messages, "compound", system_prompt)
+                    return "Groq Compound", r
                 else:
                     return provider, "نموذج غير معروف"
             except Exception as e:

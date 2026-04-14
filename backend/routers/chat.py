@@ -85,7 +85,7 @@ async def get_models(user: dict = Depends(verify_token)):
             {"id": "groq_llama",    "name": "Llama 3.3 70B"},
             {"id": "groq_llama4",   "name": "Llama 4 Scout"},
             {"id": "groq_qwen",     "name": "Qwen QwQ 32B (عربي ممتاز)"},
-            {"id": "groq_deepseek", "name": "DeepSeek R1"},
-            {"id": "groq_gemma",    "name": "Gemma 2 9B"},
+            {"id": "groq_llama_fast", "name": "Llama 3.1 8B (Fast)"},
+            {"id": "groq_compound", "name": "Groq Compound"},
         ]
     }

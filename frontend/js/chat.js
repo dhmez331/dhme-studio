@@ -74,8 +74,8 @@ const Chat = {
           'groq_llama',
           'groq_llama4',
           'groq_qwen',
-          'groq_deepseek',
-          'groq_gemma'
+          'groq_llama_fast',
+          'groq_compound'
         ] : null,
       };
 
