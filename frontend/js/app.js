@@ -31,6 +31,7 @@ const App = {
       this.showApp();
     } else {
       this.showLogin();
+      this.loadRememberedLogin();
     }
 
     // إخفاء شاشة التحميل
@@ -41,9 +42,11 @@ const App = {
   },
 
   // ─── Login ──────────────────────────────────────────────
-  async login() {
+  async login(event = null) {
+    if (event?.preventDefault) event.preventDefault();
     const username = document.getElementById('login-username').value.trim();
     const code     = document.getElementById('login-code').value.trim();
+    const remember = document.getElementById('login-remember')?.checked ?? true;
 
     if (!username) return UI.toast('أدخل اسمك', 'error');
     if (!code)     return UI.toast('أدخل كود الدعوة', 'error');
@@ -72,6 +75,7 @@ const App = {
       localStorage.setItem('dhme_token',    data.token);
       localStorage.setItem('dhme_username', data.username);
       localStorage.setItem('dhme_is_admin', data.is_admin);
+      this.saveRememberedLogin(username, code, remember);
 
       UI.toast(`أهلاً ${data.username}! 🎉`, 'success');
       this.showApp();
@@ -82,6 +86,40 @@ const App = {
       btn.disabled = false;
       btn.innerHTML = '<span>دخول</span><span>🚀</span>';
     }
+  },
+
+  toggleLoginCodeVisibility() {
+    const codeInput = document.getElementById('login-code');
+    const toggleBtn = document.getElementById('login-toggle-code');
+    if (!codeInput || !toggleBtn) return;
+    const isHidden = codeInput.type === 'password';
+    codeInput.type = isHidden ? 'text' : 'password';
+    toggleBtn.textContent = isHidden ? '🙈' : '👁️';
+    toggleBtn.title = isHidden ? 'إخفاء الكود' : 'إظهار الكود';
+  },
+
+  saveRememberedLogin(username, inviteCode, remember) {
+    if (remember) {
+      localStorage.setItem('dhme_login_username', username);
+      localStorage.setItem('dhme_login_code', inviteCode);
+      localStorage.setItem('dhme_login_remember', 'true');
+      return;
+    }
+    localStorage.removeItem('dhme_login_username');
+    localStorage.removeItem('dhme_login_code');
+    localStorage.setItem('dhme_login_remember', 'false');
+  },
+
+  loadRememberedLogin() {
+    const remember = localStorage.getItem('dhme_login_remember');
+    const remembered = remember !== 'false';
+    const usernameEl = document.getElementById('login-username');
+    const codeEl = document.getElementById('login-code');
+    const rememberEl = document.getElementById('login-remember');
+    if (rememberEl) rememberEl.checked = remembered;
+    if (!remembered) return;
+    if (usernameEl) usernameEl.value = localStorage.getItem('dhme_login_username') || '';
+    if (codeEl) codeEl.value = localStorage.getItem('dhme_login_code') || '';
   },
 
   // ─── Logout ─────────────────────────────────────────────
@@ -100,6 +138,7 @@ const App = {
   showLogin() {
     document.getElementById('login-page').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
+    this.loadRememberedLogin();
   },
 
   applyLogo(logoData) {
@@ -380,6 +419,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') {
     const loginPage = document.getElementById('login-page');
     if (loginPage && loginPage.style.display !== 'none') {
+      const active = document.activeElement;
+      if (active && active.id === 'login-code') {
+        e.preventDefault();
+      }
       App.login();
     }
   }

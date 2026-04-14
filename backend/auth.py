@@ -24,20 +24,31 @@ def get_valid_codes() -> dict:
     كودات الدعوة — Admin يعدّلها من .env
     Format: CODE:username:is_admin
     """
-    admin_code = os.getenv("ADMIN_INVITE_CODE", "dhme_admin_2026")
+    admin_code = (os.getenv("ADMIN_INVITE_CODE") or "dhme_admin_2026").strip()
+    fallback_admin_code = "dhme_admin_2026"
     
     # كودات ثابتة للعائلة والأصدقاء — تُضاف هنا
     codes = {
         admin_code: {"username": "admin", "is_admin": True},
+        fallback_admin_code: {"username": "admin", "is_admin": True},
         "dhme_family_001": {"username": "family1", "is_admin": False},
         "dhme_family_002": {"username": "family2", "is_admin": False},
         "dhme_friend_001": {"username": "friend1", "is_admin": False},
         "dhme_friend_002": {"username": "friend2", "is_admin": False},
     }
-    return codes
+    # توحيد شكل الكود لتجنب مشاكل case/spacing
+    return {k.strip().lower(): v for k, v in codes.items() if k and k.strip()}
 
 # ─── Login ───────────────────────────────────────────────
 def login(invite_code: str, username: str) -> TokenData:
+    invite_code = (invite_code or "").strip().lower()
+    username = (username or "").strip()
+
+    if not username:
+        raise HTTPException(status_code=400, detail="اسم المستخدم مطلوب")
+    if not invite_code:
+        raise HTTPException(status_code=400, detail="كود الدعوة مطلوب")
+
     codes = get_valid_codes()
     
     if invite_code not in codes:

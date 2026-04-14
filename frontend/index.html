@@ -42,20 +42,30 @@
       <p>دحمي استوديو — منصة الذكاء الاصطناعي</p>
     </div>
 
-    <div class="login-form">
+    <form class="login-form" onsubmit="App.login(event); return false;">
       <div class="form-group">
         <label class="form-label">اسمك</label>
         <input type="text" id="login-username" class="input"
-          placeholder="أدخل اسمك" autocomplete="off" />
+          placeholder="أدخل اسمك" autocomplete="username" autocapitalize="none" spellcheck="false" />
       </div>
 
       <div class="form-group">
         <label class="form-label">كود الدعوة</label>
-        <input type="password" id="login-code" class="input"
-          placeholder="أدخل كود الدعوة" />
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="password" id="login-code" class="input"
+            placeholder="أدخل كود الدعوة" autocomplete="current-password" autocapitalize="none" spellcheck="false" style="flex:1;" />
+          <button type="button" class="btn btn-ghost" id="login-toggle-code"
+            onclick="App.toggleLoginCodeVisibility()" title="إظهار/إخفاء الكود">👁️</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+          <input type="checkbox" id="login-remember" checked />
+          <label for="login-remember" style="font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">
+            تذكر بيانات الدخول على هذا الجهاز
+          </label>
+        </div>
       </div>
 
-      <button class="btn btn-primary btn-lg" onclick="App.login()" id="login-btn">
+      <button type="submit" class="btn btn-primary btn-lg" id="login-btn">
         <span>دخول</span>
         <span>🚀</span>
       </button>
@@ -63,7 +73,7 @@
       <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:8px;">
         تواصل مع المدير للحصول على كود الدعوة
       </p>
-    </div>
+    </form>
   </div>
 </div>
 
