@@ -48,8 +48,16 @@ async def gemini_chat(
 
     except Exception as e:
         error_str = str(e)
-        # إذا quota خلصت، نرجع لـ Groq تلقائياً
-        if "429" in error_str or "quota" in error_str.lower():
+        error_lower = error_str.lower()
+        # fallback أوسع: quota / not found / permission / unsupported
+        if (
+            "429" in error_str
+            or "quota" in error_lower
+            or "not found" in error_lower
+            or "permission" in error_lower
+            or "unsupported" in error_lower
+            or "invalid argument" in error_lower
+        ):
             from services.groq_service import groq_chat
             return await groq_chat(messages, "llama", system_prompt)
         raise Exception(f"Gemini error ({model}): {error_str}")
