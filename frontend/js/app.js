@@ -48,22 +48,36 @@ const App = {
     const code     = document.getElementById('login-code').value.trim();
     const remember = document.getElementById('login-remember')?.checked ?? true;
 
-    if (!username) return UI.toast('أدخل اسمك', 'error');
-    if (!code)     return UI.toast('أدخل كود الدعوة', 'error');
+    if (!username) {
+      this.setLoginStatus('أدخل اسم المستخدم أولاً', 'error');
+      return UI.toast('أدخل اسمك', 'error');
+    }
+    if (!code) {
+      this.setLoginStatus('أدخل كود الدعوة أولاً', 'error');
+      return UI.toast('أدخل كود الدعوة', 'error');
+    }
 
     const btn = document.getElementById('login-btn');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div>';
+    this.setLoginStatus('جاري تسجيل الدخول...', 'info');
 
     try {
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 20000);
       const res = await fetch(
         `${this.state.apiBase}/api/chat/login?invite_code=${encodeURIComponent(code)}&username=${encodeURIComponent(username)}`,
-        { method: 'POST' }
+        { method: 'POST', signal: ctrl.signal }
       );
+      clearTimeout(timeout);
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.detail || 'فشل تسجيل الدخول');
+        let msg = 'فشل تسجيل الدخول';
+        try {
+          const err = await res.json();
+          msg = err.detail || err.message || msg;
+        } catch (_) {}
+        throw new Error(msg);
       }
 
       const data = await res.json();
@@ -77,15 +91,38 @@ const App = {
       localStorage.setItem('dhme_is_admin', data.is_admin);
       this.saveRememberedLogin(username, code, remember);
 
+      this.setLoginStatus(`تم تسجيل الدخول بنجاح كـ ${data.username}`, 'success');
       UI.toast(`أهلاً ${data.username}! 🎉`, 'success');
       this.showApp();
 
     } catch (e) {
-      UI.toast(e.message, 'error');
+      const msg = e?.name === 'AbortError'
+        ? 'انتهت مهلة الاتصال بالسيرفر، حاول مرة أخرى'
+        : (e?.message || 'تعذر تسجيل الدخول');
+      this.setLoginStatus(msg, 'error');
+      UI.toast(msg, 'error');
     } finally {
       btn.disabled = false;
       btn.innerHTML = '<span>دخول</span><span>🚀</span>';
     }
+  },
+
+  setLoginStatus(message = '', type = 'info') {
+    const el = document.getElementById('login-status');
+    if (!el) return;
+    if (!message) {
+      el.style.display = 'none';
+      el.textContent = '';
+      return;
+    }
+    const colors = {
+      success: '#22c55e',
+      error: '#ef4444',
+      info: 'var(--text-secondary)'
+    };
+    el.style.display = 'block';
+    el.style.color = colors[type] || colors.info;
+    el.textContent = message;
   },
 
   toggleLoginCodeVisibility() {
@@ -139,6 +176,7 @@ const App = {
     document.getElementById('login-page').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
     this.loadRememberedLogin();
+    this.setLoginStatus('');
   },
 
   applyLogo(logoData) {
