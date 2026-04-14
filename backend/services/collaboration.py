@@ -20,7 +20,17 @@ async def collaborate_chat(
     from services.groq_service import groq_chat, groq_chat_multi
 
     if providers is None:
-        providers = ["gemini_flash", "groq_llama", "groq_qwen"]
+        providers = [
+            "gemini_flash",
+            "gemini_pro",
+            "gemini_thinking",
+            "gemini_flash_lite",
+            "groq_llama",
+            "groq_llama4",
+            "groq_qwen",
+            "groq_deepseek",
+            "groq_gemma",
+        ]
 
     # ─── وضع المنافسة — كل نموذج يجاوب لوحده ─────────────
     if mode == "compete":
@@ -37,15 +47,24 @@ async def collaborate_chat(
                 elif provider == "gemini_thinking":
                     r = await gemini_chat(messages, "thinking", system_prompt)
                     return "Gemini Thinking", r
+                elif provider == "gemini_flash_lite":
+                    r = await gemini_chat(messages, "flash_lite", system_prompt)
+                    return "Gemini Flash Lite", r
                 elif provider == "groq_llama":
                     r = await groq_chat(messages, "llama", system_prompt)
                     return "Llama 3.3 70B", r
+                elif provider == "groq_llama4":
+                    r = await groq_chat(messages, "llama4", system_prompt)
+                    return "Llama 4 Scout", r
                 elif provider == "groq_deepseek":
                     r = await groq_chat(messages, "deepseek", system_prompt)
                     return "DeepSeek R1", r
                 elif provider == "groq_qwen":
                     r = await groq_chat(messages, "qwen", system_prompt)
                     return "Qwen QwQ 32B", r
+                elif provider == "groq_gemma":
+                    r = await groq_chat(messages, "gemma", system_prompt)
+                    return "Gemma 2 9B", r
                 else:
                     return provider, "نموذج غير معروف"
             except Exception as e:
