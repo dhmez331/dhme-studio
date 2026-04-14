@@ -37,7 +37,7 @@ const Chat = {
         use_search:           this.useSearch,
         collaboration_mode:   this.collaborationMode,
         collaboration_providers: this.collaborationMode ? [
-          'gemini_flash', 'groq_llama', 'groq_mistral'
+          'gemini_flash', 'groq_llama', 'groq_qwen'
         ] : null,
       };
 

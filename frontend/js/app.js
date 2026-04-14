@@ -102,6 +102,23 @@ const App = {
     document.getElementById('app').style.display = 'none';
   },
 
+  applyLogo(logoData) {
+    if (!logoData) return;
+
+    document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
+      img.src = logoData;
+      img.style.display = 'block';
+    });
+
+    const sidebarLogoDiv = document.querySelector('.sidebar-logo');
+    if (sidebarLogoDiv) {
+      const iconContainer = sidebarLogoDiv.querySelector('div');
+      if (iconContainer) {
+        iconContainer.innerHTML = `<img src="${logoData}" style="width:36px;height:36px;border-radius:8px;" />`;
+      }
+    }
+  },
+
   showApp() {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
@@ -115,19 +132,7 @@ const App = {
     // ── تحديث اللوقو من localStorage ──
     const savedLogo = localStorage.getItem('dhme_logo');
     if (savedLogo) {
-      // تحديث كل عناصر اللوقو
-      document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
-        img.src = savedLogo;
-        img.style.display = 'block';
-      });
-      // تحديث الـ emoji في الـ sidebar إذا موجود
-      const sidebarLogoDiv = document.querySelector('.sidebar-logo');
-      if (sidebarLogoDiv) {
-        const emojiDiv = sidebarLogoDiv.querySelector('div[style*="font-size:1.6rem"]');
-        if (emojiDiv && savedLogo) {
-          emojiDiv.innerHTML = `<img src="${savedLogo}" style="width:36px;height:36px;border-radius:8px;" />`;
-        }
-      }
+      this.applyLogo(savedLogo);
     }
 
     this.navigate('home');
@@ -263,17 +268,7 @@ const Admin = {
         localStorage.setItem('dhme_logo', compressed);
 
         // تحديث كل عناصر اللوقو في الصفحة فوراً
-        document.getElementById('current-logo').src = compressed;
-        document.getElementById('current-logo').style.display = 'block';
-
-        // تحديث الـ sidebar
-        const sidebarLogoDiv = document.querySelector('.sidebar-logo');
-        if (sidebarLogoDiv) {
-          const emojiDiv = sidebarLogoDiv.querySelector('div');
-          if (emojiDiv) {
-            emojiDiv.innerHTML = `<img src="${compressed}" style="width:36px;height:36px;border-radius:8px;" />`;
-          }
-        }
+        App.applyLogo(compressed);
 
         UI.toast('تم تحديث اللوقو ✅', 'success');
       };
