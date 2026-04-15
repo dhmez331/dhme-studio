@@ -255,6 +255,36 @@ body.mobile-sidebar-open {
   overflow: hidden;
 }
 
+#mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: 130;
+  height: 48px;
+  padding: 8px 52px 8px 10px;
+  background: color-mix(in srgb, var(--bg-primary) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mobile-topbar-brand .brand-wordmark {
+  width: 124px;
+}
+
+#mobile-topbar-title {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46vw;
+}
+
 .bottom-nav-inner {
   display: flex;
   align-items: center;
@@ -457,6 +487,10 @@ body.mobile-sidebar-open {
     display: inline-flex;
   }
 
+  #mobile-topbar {
+    display: flex;
+  }
+
   .sidebar {
     display: flex;
     width: min(84vw, 320px);
@@ -498,6 +532,7 @@ body.mobile-sidebar-open {
   .nav-item {
     font-size: 0.9rem;
     padding: 12px 12px;
+    min-height: 44px;
   }
 
   .btn {
@@ -541,6 +576,20 @@ body.mobile-sidebar-open {
     height: 38px;
     top: max(8px, env(safe-area-inset-top));
     inset-inline-end: 8px;
+  }
+
+  #mobile-topbar {
+    height: 46px;
+    padding: max(8px, env(safe-area-inset-top)) 48px 8px 8px;
+  }
+
+  .mobile-topbar-brand .brand-wordmark {
+    width: 108px;
+  }
+
+  #mobile-topbar-title {
+    font-size: 0.76rem;
+    max-width: 42vw;
   }
 
   .sidebar {
