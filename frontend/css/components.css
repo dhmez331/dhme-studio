@@ -127,10 +127,13 @@ textarea.input {
   position: fixed;
   top: 0;
   inset-inline-start: 0;
+  right: 0;
+  left: auto;
   width: var(--sidebar-width);
   height: 100vh;
   background: var(--sidebar-bg);
   border-inline-end: 1px solid var(--border);
+  border-inline-start: none;
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -259,8 +262,8 @@ body.mobile-sidebar-open {
   display: none;
   position: fixed;
   top: 0;
-  inset-inline-start: 0;
-  inset-inline-end: 0;
+  left: 0;
+  right: 0;
   z-index: 130;
   height: 48px;
   padding: 8px 52px 8px 10px;
@@ -270,6 +273,7 @@ body.mobile-sidebar-open {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  overflow: hidden;
 }
 
 .mobile-topbar-brand .brand-wordmark {
@@ -283,6 +287,7 @@ body.mobile-sidebar-open {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 46vw;
+  text-align: end;
 }
 
 .bottom-nav-inner {
@@ -496,8 +501,8 @@ body.mobile-sidebar-open {
     width: min(84vw, 320px);
     max-width: 92vw;
     height: 100dvh;
-    inset-inline-start: auto;
-    inset-inline-end: 0;
+    left: auto;
+    right: 0;
     border-inline-end: none;
     border-inline-start: 1px solid var(--border);
     transform: translateX(105%);
@@ -594,6 +599,7 @@ body.mobile-sidebar-open {
 
   .sidebar {
     width: min(88vw, 300px);
+    max-width: calc(100vw - 24px);
   }
 
   .modal {
