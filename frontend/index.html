@@ -286,6 +286,16 @@
           <textarea id="image-prompt" class="input" rows="3"
             placeholder="صف الصورة اللي تبيها..."></textarea>
         </div>
+        <div class="form-group">
+          <label class="form-label">قوالب سريعة</label>
+          <div id="image-presets" style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.78rem;" onclick="ImageGen.applyPreset('logo')">شعار</button>
+            <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.78rem;" onclick="ImageGen.applyPreset('portrait')">بورتريه</button>
+            <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.78rem;" onclick="ImageGen.applyPreset('product')">منتج</button>
+            <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.78rem;" onclick="ImageGen.applyPreset('anime')">أنمي</button>
+            <button class="btn btn-secondary" style="padding:6px 10px; font-size:0.78rem;" onclick="ImageGen.applyPreset('cinematic')">سينمائي</button>
+          </div>
+        </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
           <div class="form-group" style="flex:1; min-width:160px;">
             <label class="form-label">النموذج</label>
@@ -303,10 +313,26 @@
               <div class="collab-option" onclick="ImageGen.setMode('collaborate', this)">تعاون</div>
             </div>
           </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label class="form-label">المقاس</label>
+            <select id="image-ratio" class="input" style="padding:10px 12px;">
+              <option value="1:1">1:1 (مربع)</option>
+              <option value="4:5">4:5 (بورتريه)</option>
+              <option value="16:9">16:9 (أفقي)</option>
+            </select>
+          </div>
+          <div class="form-group" style="min-width:140px;">
+            <label class="form-label">تحسين البرومبت</label>
+            <label style="display:flex; gap:8px; align-items:center; color:var(--text-secondary);">
+              <input id="image-enhance" type="checkbox" checked />
+              تفعيل
+            </label>
+          </div>
           <button class="btn btn-primary" onclick="ImageGen.generate()" id="image-gen-btn">
             <span>توليد</span> <span>✨</span>
           </button>
         </div>
+        <div id="image-status" style="font-size:0.82rem; color:var(--text-muted); min-height:18px;"></div>
       </div>
       <div id="image-results" class="image-results">
         <div class="empty-state" style="grid-column:1/-1;">
@@ -612,7 +638,7 @@
 ═══════════════════════════════════════════════════ -->
 <script src="js/ui.js"></script>
 <script src="js/chat.js"></script>
-<script src="js/image.js"></script>
+<script src="js/image_runtime.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/video.js"></script>
 <script src="js/analyze.js"></script>

@@ -295,4 +295,3 @@ const UI = {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
 };
-};

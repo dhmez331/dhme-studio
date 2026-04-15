@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
+from services.image_gateway import get_image_health
 
 # Load environment variables
 load_dotenv()
@@ -48,7 +49,19 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    image_health = get_image_health()
+    return {
+        "status": "healthy" if image_health.get("status") == "ok" else "degraded",
+        "image": image_health,
+        "warnings": [] if image_health.get("status") == "ok" else [
+            "Image providers are not fully configured. Set CLOUDFLARE_* or HUGGINGFACE_TOKEN."
+        ],
+    }
+
+
+@app.get("/health/image")
+async def health_image():
+    return get_image_health()
 
 # ─── Global Error Handler ────────────────────────────────
 @app.exception_handler(Exception)

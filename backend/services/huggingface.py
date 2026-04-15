@@ -16,6 +16,10 @@ IMAGE_MODELS = {
     "sdxl":         "stabilityai/stable-diffusion-xl-base-1.0",
 }
 
+
+def huggingface_is_configured() -> bool:
+    return bool(HF_TOKEN and HF_TOKEN.strip())
+
 # ─── Generate Image ───────────────────────────────────────
 async def generate_image(
     prompt: str,
@@ -25,6 +29,9 @@ async def generate_image(
     height: int = 1024
 ) -> bytes:
     try:
+        if not huggingface_is_configured():
+            raise Exception("auth: HUGGINGFACE_TOKEN is missing")
+
         model_id = IMAGE_MODELS.get(model, IMAGE_MODELS["flux_schnell"])
         
         payload = {
@@ -43,10 +50,20 @@ async def generate_image(
                 json=payload
             )
             
+            if response.status_code == 401 or response.status_code == 403:
+                raise Exception("auth: HuggingFace token unauthorized")
+            if response.status_code == 429:
+                raise Exception("quota: HuggingFace rate limit reached")
+            if response.status_code == 503:
+                raise Exception("model_unavailable: HuggingFace model loading/unavailable")
+            if response.status_code >= 500:
+                raise Exception("upstream: HuggingFace internal service error")
             if response.status_code != 200:
-                raise Exception(f"HuggingFace error: {response.text[:200]}")
+                raise Exception(f"upstream: HuggingFace error ({response.status_code})")
             
             return response.content
 
+    except httpx.TimeoutException as e:
+        raise Exception("timeout: HuggingFace request timed out") from e
     except Exception as e:
-        raise Exception(f"Image generation error: {str(e)}")
+        raise Exception(str(e))

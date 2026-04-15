@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Optional
 from auth import verify_token
 from services.gemini import gemini_edit_image, gemini_chat
-from services.huggingface import generate_image
+from services.image_gateway import generate_image_with_fallback
 import base64
 
 router = APIRouter()
@@ -44,7 +44,7 @@ async def video_from_image(
             image_prompt = prompt
 
         # الخطوة 2: FLUX يولد الصورة المعدّلة
-        new_image = await generate_image(image_prompt, "flux_dev")
+        new_image, provider, attempts = await generate_image_with_fallback(image_prompt, "flux_dev")
         img_b64 = base64.b64encode(new_image).decode()
 
         return JSONResponse({
@@ -52,7 +52,9 @@ async def video_from_image(
             "note": "توليد الفيديو قيد التطوير — تم توليد صورة معدّلة",
             "analysis": edit_result,
             "enhanced_prompt": image_prompt,
-            "image_b64": img_b64
+            "image_b64": img_b64,
+            "provider": provider,
+            "attempts": attempts,
         })
 
     except Exception as e:
