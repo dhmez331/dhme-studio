@@ -188,6 +188,11 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.chat-controls > * {
+  min-width: 0;
 }
 
 .chat-messages {
@@ -241,6 +246,8 @@
   border-radius: var(--radius);
   line-height: 1.65;
   font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ai-msg .msg-bubble {
@@ -731,6 +738,7 @@
   .chat-controls .input {
     flex: 1;
     min-width: 120px;
+    max-width: 100%;
     font-size: 0.84rem;
     padding: 8px 10px !important;
   }
