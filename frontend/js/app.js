@@ -253,6 +253,7 @@ const App = {
     this.state.currentPage = page;
 
     // تهيئة الصفحات
+    if (page === 'chat')    try { Chat.init(); }    catch(e) {}
     if (page === 'prompts') try { Prompts.init(); } catch(e) {}
     if (page === 'admin')   try { Admin.init(); }   catch(e) {}
     if (page === 'history') try { History.init(); } catch(e) {}
