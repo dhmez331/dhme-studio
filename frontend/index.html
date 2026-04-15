@@ -222,6 +222,7 @@
       <div class="chat-header">
         <h2 class="chat-title">💬 المحادثة الذكية</h2>
         <div class="chat-controls">
+          <button class="btn btn-ghost btn-icon" onclick="Chat.toggleSessionsPanel()" title="المحادثات السابقة">🗂️</button>
           <select id="chat-model" class="input" style="width:auto; padding:8px 12px;">
             <option value="gemini_flash">Gemini 2.0 Flash</option>
             <option value="gemini_pro">Gemini 1.5 Pro</option>
@@ -233,6 +234,13 @@
             <option value="groq_llama_fast">Llama 3.1 8B (Fast)</option>
             <option value="groq_compound">Groq Compound</option>
           </select>
+          <select id="chat-profile" class="input" style="width:auto; padding:8px 12px;" title="نمط البرومبت" onchange="Chat.onProfileChange()">
+            <option value="balanced">Balanced</option>
+            <option value="precise">Precise</option>
+            <option value="creative">Creative</option>
+            <option value="tutor">Tutor</option>
+            <option value="coder">Coder</option>
+          </select>
           <div class="collab-toggle">
             <div class="collab-option active" onclick="Chat.setCollab(null, this)">فردي</div>
             <div class="collab-option" onclick="Chat.setCollab('compete', this)">منافسة</div>
@@ -243,6 +251,13 @@
           <button class="btn btn-ghost btn-icon" onclick="Chat.clear()">🗑️</button>
         </div>
       </div>
+      <div id="chat-sessions-panel" style="display:none; margin-bottom:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="font-size:0.9rem;">🗂️ المحادثات السابقة</strong>
+          <button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 8px;" onclick="Chat.newSession()">+ محادثة جديدة</button>
+        </div>
+        <div id="chat-sessions-list" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto;"></div>
+      </div>
       <div class="chat-messages" id="chat-messages">
         <div class="empty-state">
           <div class="empty-state-icon">💬</div>
@@ -250,11 +265,13 @@
         </div>
       </div>
       <div class="chat-input-area">
-        <div class="chat-input-wrapper">
+        <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:6px;">اكتب / لعرض الاوامر السريعة</div>
+        <div class="chat-input-wrapper" style="position:relative;">
           <textarea class="chat-input" id="chat-input"
             placeholder="اكتب رسالتك هنا..." rows="1"
             onkeydown="Chat.handleKey(event)"
-            oninput="Chat.autoResize(this)"></textarea>
+            oninput="Chat.onInput(this)"></textarea>
+          <div id="chat-commands-menu" style="display:none; position:absolute; bottom:52px; left:10px; right:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:8px; z-index:20; max-height:220px; overflow:auto;"></div>
           <button class="btn btn-secondary btn-icon" onclick="Chat.stop()" id="chat-stop-btn"
             title="إيقاف التوليد" style="display:none;">
             ⏹️
