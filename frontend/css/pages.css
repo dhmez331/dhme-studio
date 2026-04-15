@@ -161,7 +161,8 @@
 .chat-page {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 48px);
+  height: calc(100dvh - 48px);
+  min-height: calc(100svh - 48px);
   max-width: 860px;
   margin: 0 auto;
 }
@@ -702,13 +703,15 @@
   }
 
   .chat-page {
-    height: calc(100vh - 92px);
+    height: auto;
+    min-height: calc(100dvh - 120px);
+    min-height: calc(100svh - 120px);
     max-width: 100%;
   }
 
   .chat-header {
     position: sticky;
-    top: 0;
+    top: 48px;
     z-index: 5;
     margin-bottom: 10px;
     padding: 8px 0 10px;
@@ -730,6 +733,12 @@
     min-width: 120px;
     font-size: 0.84rem;
     padding: 8px 10px !important;
+  }
+
+  .chat-messages {
+    min-height: 42vh;
+    max-height: 56vh;
+    -webkit-overflow-scrolling: touch;
   }
 
   .chat-controls .btn-icon {
@@ -845,12 +854,18 @@
   }
 
   .chat-page {
-    height: calc(100vh - 96px);
+    min-height: calc(100dvh - 118px);
+    min-height: calc(100svh - 118px);
   }
 
   .chat-controls .input {
     min-width: 100%;
     width: 100%;
+  }
+
+  .chat-messages {
+    min-height: 46vh;
+    max-height: 58vh;
   }
 
   .chat-controls .collab-toggle {

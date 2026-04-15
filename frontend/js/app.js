@@ -55,6 +55,9 @@ const App = {
     window.addEventListener('resize', () => {
       if (!this.isMobile()) this.closeMobileSidebar();
     });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') this.closeMobileSidebar();
+    });
   },
 
   isMobile() {
@@ -70,6 +73,23 @@ const App = {
   closeMobileSidebar() {
     this.state.mobileSidebarOpen = false;
     document.body.classList.remove('mobile-sidebar-open');
+  },
+
+  updateMobileTopbar(page) {
+    const map = {
+      home: 'الرئيسية',
+      chat: 'المحادثة الذكية',
+      image: 'توليد الصور',
+      voice: 'الصوت والتحويل',
+      video: 'توليد الفيديو',
+      analyze: 'تحليل الملفات',
+      prompts: 'مكتبة البرومبتات',
+      history: 'السجل',
+      settings: 'الإعدادات',
+      admin: 'لوحة الإدارة',
+    };
+    const el = document.getElementById('mobile-topbar-title');
+    if (el) el.textContent = map[page] || 'Dhme Studio';
   },
 
   // ─── Login ──────────────────────────────────────────────
@@ -274,6 +294,7 @@ const App = {
 
     this.state.currentPage = page;
     this.closeMobileSidebar();
+    this.updateMobileTopbar(page);
 
     // تهيئة الصفحات
     if (page === 'chat')    try { Chat.init(); }    catch(e) {}
