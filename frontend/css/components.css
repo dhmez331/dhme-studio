@@ -136,6 +136,7 @@ textarea.input {
   z-index: 100;
   transition: transform var(--transition), width var(--transition);
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .sidebar-logo {
@@ -216,7 +217,7 @@ textarea.input {
 
 /* ─── Bottom Navigation (Mobile) ────────────────────────── */
 .bottom-nav {
-  display: none;
+  display: none !important;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -226,6 +227,32 @@ textarea.input {
   border-top: 1px solid var(--border);
   z-index: 100;
   padding: 0 8px;
+}
+
+#mobile-menu-btn {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  inset-inline-end: 10px;
+  z-index: 160;
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(6px);
+}
+
+#mobile-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 6, 14, 0.52);
+  z-index: 140;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition);
+}
+
+body.mobile-sidebar-open {
+  overflow: hidden;
 }
 
 .bottom-nav-inner {
@@ -426,12 +453,102 @@ textarea.input {
 
 /* ─── Responsive ─────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .sidebar { display: none; }
-  .bottom-nav { display: flex; }
+  #mobile-menu-btn {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    display: flex;
+    width: min(84vw, 320px);
+    max-width: 92vw;
+    height: 100dvh;
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    border-inline-end: none;
+    border-inline-start: 1px solid var(--border);
+    transform: translateX(105%);
+    z-index: 150;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.3);
+    transition: transform var(--transition);
+  }
+
+  body.mobile-sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  body.mobile-sidebar-open #mobile-sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar-logo {
+    padding: 16px 14px;
+    min-height: 64px;
+  }
+
+  .sidebar-nav {
+    padding: 10px 8px;
+    gap: 6px;
+  }
+
+  .sidebar-footer {
+    padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+  }
+
+  .nav-item {
+    font-size: 0.9rem;
+    padding: 12px 12px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+  }
+
+  .btn-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+
+  .input {
+    font-size: 0.9rem;
+    padding: 10px 12px;
+  }
+
+  #toast-container {
+    top: max(10px, env(safe-area-inset-top));
+    inset-inline-end: 10px;
+    inset-inline-start: 10px;
+  }
+
+  .toast {
+    max-width: 100%;
+    width: 100%;
+    font-size: 0.84rem;
+    padding: 10px 12px;
+  }
 }
 
 @media (max-width: 1100px) {
   .sidebar-logo-text .brand-wordmark-sidebar {
     width: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  #mobile-menu-btn {
+    width: 38px;
+    height: 38px;
+    top: max(8px, env(safe-area-inset-top));
+    inset-inline-end: 8px;
+  }
+
+  .sidebar {
+    width: min(88vw, 300px);
+  }
+
+  .modal {
+    padding: 18px 14px;
+    border-radius: 14px;
   }
 }

@@ -12,6 +12,7 @@ const App = {
     isAdmin:     false,
     currentPage: 'home',
     apiBase:     'https://dhme-studio-api1.onrender.com',
+    mobileSidebarOpen: false,
   },
 
   toast(message, type = 'info') {
@@ -50,6 +51,25 @@ const App = {
       const screen = document.getElementById('loading-screen');
       if (screen) screen.classList.add('hidden');
     }, 800);
+
+    window.addEventListener('resize', () => {
+      if (!this.isMobile()) this.closeMobileSidebar();
+    });
+  },
+
+  isMobile() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  },
+
+  toggleMobileSidebar() {
+    if (!this.isMobile()) return;
+    this.state.mobileSidebarOpen = !this.state.mobileSidebarOpen;
+    document.body.classList.toggle('mobile-sidebar-open', this.state.mobileSidebarOpen);
+  },
+
+  closeMobileSidebar() {
+    this.state.mobileSidebarOpen = false;
+    document.body.classList.remove('mobile-sidebar-open');
   },
 
   // ─── Login ──────────────────────────────────────────────
@@ -186,6 +206,7 @@ const App = {
   showLogin() {
     document.getElementById('login-page').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
+    this.closeMobileSidebar();
     this.loadRememberedLogin();
     this.setLoginStatus('');
   },
@@ -210,6 +231,7 @@ const App = {
   showApp() {
     document.getElementById('login-page').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
+    this.closeMobileSidebar();
 
     const el = document.getElementById('sidebar-username');
     if (el) el.textContent = this.state.username;
@@ -245,12 +267,13 @@ const App = {
     if (target) target.style.display = '';
 
     // Active state
-    document.querySelectorAll('.nav-item, .bottom-nav-item').forEach(item => {
+    document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
       if (item.dataset.page === page) item.classList.add('active');
     });
 
     this.state.currentPage = page;
+    this.closeMobileSidebar();
 
     // تهيئة الصفحات
     if (page === 'chat')    try { Chat.init(); }    catch(e) {}
