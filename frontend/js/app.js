@@ -193,7 +193,7 @@ const App = {
   applyLogo(logoData) {
     if (!logoData) return;
 
-    document.querySelectorAll('.sidebar-logo img, .logo-img, #current-logo').forEach(img => {
+    document.querySelectorAll('.sidebar-logo img:not(.brand-wordmark), .logo-img, #current-logo').forEach(img => {
       img.src = logoData;
       img.style.display = 'block';
     });

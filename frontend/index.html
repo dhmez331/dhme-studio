@@ -9,7 +9,8 @@
   <!-- PWA -->
   <meta name="theme-color" content="#7C3AED" />
   <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/logo.png" />
+  <link id="theme-favicon" rel="icon" type="image/png" href="/logo-wordmark-dark.png" />
+  <link id="theme-apple-touch-icon" rel="apple-touch-icon" href="/logo-wordmark-dark.png" />
 
   <!-- CSS -->
   <link rel="stylesheet" href="css/main.css" />
@@ -22,7 +23,10 @@
      LOADING SCREEN
 ═══════════════════════════════════════════════════ -->
 <div id="loading-screen">
-  <div class="loading-logo">Dhme Studio</div>
+  <div class="loading-logo">
+    <img src="/logo-wordmark-dark.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-dark" />
+    <img src="/logo-wordmark-light.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-light" />
+  </div>
   <div class="loading-bar">
     <div class="loading-bar-fill"></div>
   </div>
@@ -37,8 +41,8 @@
 <div id="login-page" class="login-page" style="display:none;">
   <div class="login-card">
     <div class="login-logo">
-      <div style="font-size:3rem;">🧠</div>
-      <h1>Dhme Studio</h1>
+      <img src="/logo-wordmark-dark.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-dark brand-wordmark-login" />
+      <img src="/logo-wordmark-light.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-light brand-wordmark-login" />
       <p>دحمي استوديو — منصة الذكاء الاصطناعي</p>
     </div>
 
@@ -89,7 +93,10 @@
     <div class="sidebar-logo">
       <div style="font-size:1.6rem;">🧠</div>
       <div>
-        <div class="sidebar-logo-text">Dhme Studio</div>
+        <div class="sidebar-logo-text">
+          <img src="/logo-wordmark-dark.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-dark brand-wordmark-sidebar" />
+          <img src="/logo-wordmark-light.png" alt="Dhme Studio" class="brand-wordmark brand-wordmark-light brand-wordmark-sidebar" />
+        </div>
         <div style="font-size:0.7rem; color:var(--text-muted);" id="sidebar-username"></div>
       </div>
     </div>

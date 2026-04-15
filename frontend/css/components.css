@@ -154,12 +154,15 @@ textarea.input {
 }
 
 .sidebar-logo-text {
-  font-size: 1.1rem;
-  font-weight: 800;
-  background: var(--accent-grad);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-logo-text .brand-wordmark-sidebar {
+  width: 150px;
+  max-width: 100%;
+  height: auto;
 }
 
 .sidebar-nav {
@@ -425,4 +428,10 @@ textarea.input {
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .bottom-nav { display: flex; }
+}
+
+@media (max-width: 1100px) {
+  .sidebar-logo-text .brand-wordmark-sidebar {
+    width: 130px;
+  }
 }
