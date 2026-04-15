@@ -183,9 +183,13 @@ const Chat = {
       this.clear();
       this.notify('تم مسح المحادثة', 'info');
     } else if (cmd === 'search') {
-      if (arg === 'on') this.useSearch = false;
-      if (arg === 'off') this.useSearch = true;
-      this.toggleSearch();
+      if (arg === 'on') {
+        this.setSearch(true);
+      } else if (arg === 'off') {
+        this.setSearch(false);
+      } else {
+        this.toggleSearch();
+      }
     } else if (cmd === 'model') {
       const modelId = args.join('_');
       const sel = document.getElementById('chat-model');
@@ -198,9 +202,20 @@ const Chat = {
         this.notify(`تم اختيار: ${option.textContent}`, 'success');
       }
     } else if (cmd === 'help') {
-      this.notify('الأوامر: /clear - /search on|off - /model <id> - /help', 'info');
+      this.renderMessage('ai', [
+        'الأوامر السريعة المتاحة:',
+        '- `/help` عرض المساعدة',
+        '- `/clear` مسح المحادثة',
+        '- `/search on` تفعيل البحث',
+        '- `/search off` تعطيل البحث',
+        '- `/model <id>` اختيار نموذج (مثال: `/model groq_qwen`)',
+      ].join('\n'), {
+        label: '⌨️ أوامر سريعة'
+      });
     } else {
-      this.notify('أمر غير معروف. استخدم /help', 'error');
+      this.renderMessage('ai', 'أمر غير معروف. اكتب `/help` لعرض الأوامر.', {
+        label: '⚠️ أمر غير معروف'
+      });
     }
 
     if (inputEl) {
@@ -342,7 +357,11 @@ const Chat = {
   },
 
   toggleSearch() {
-    this.useSearch = !this.useSearch;
+    this.setSearch(!this.useSearch);
+  },
+
+  setSearch(enabled) {
+    this.useSearch = !!enabled;
     const btn = document.getElementById('search-toggle');
     if (btn) {
       btn.style.background = this.useSearch ? 'var(--accent-1)' : '';
