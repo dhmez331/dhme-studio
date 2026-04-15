@@ -48,6 +48,16 @@ const UI = {
 
   applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
+    this.updateBrandAssets(theme);
+  },
+
+  updateBrandAssets(theme) {
+    const isLight = theme === 'light';
+    const iconPath = isLight ? '/logo-wordmark-light.png' : '/logo-wordmark-dark.png';
+    const favicon = document.getElementById('theme-favicon');
+    const appleTouch = document.getElementById('theme-apple-touch-icon');
+    if (favicon) favicon.setAttribute('href', iconPath);
+    if (appleTouch) appleTouch.setAttribute('href', iconPath);
   },
 
   updateThemeActive(theme) {

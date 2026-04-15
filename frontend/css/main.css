@@ -216,6 +216,15 @@ body {
   transition: background var(--transition), color var(--transition);
 }
 
+.brand-wordmark {
+  display: none;
+  max-width: 100%;
+  height: auto;
+}
+
+[data-theme="dark"] .brand-wordmark-dark { display: block; }
+[data-theme="light"] .brand-wordmark-light { display: block; }
+
 [dir="rtl"] body { font-family: var(--font-ar); }
 [dir="ltr"] body { font-family: var(--font-en); }
 
@@ -278,10 +287,14 @@ a:hover { opacity:0.8; }
 #loading-screen.hidden { opacity:0; visibility:hidden; }
 
 .loading-logo {
-  font-size:2rem; font-weight:800;
-  background:var(--accent-grad);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   animation:pulse 1.5s ease-in-out infinite;
+}
+.loading-logo .brand-wordmark {
+  width: min(300px, 72vw);
 }
 .loading-bar { width:200px; height:3px; background:var(--bg-card); border-radius:2px; overflow:hidden; }
 .loading-bar-fill { height:100%; background:var(--accent-grad); border-radius:2px; animation:loadFill 1.5s ease-in-out infinite; }
@@ -291,4 +304,9 @@ a:hover { opacity:0.8; }
 
 @media (max-width:768px) {
   .main-content { margin-inline-start:0; padding:16px; padding-bottom:80px; }
+  .loading-logo .brand-wordmark { width: min(240px, 76vw); }
+}
+
+@media (max-width:480px) {
+  .loading-logo .brand-wordmark { width: min(210px, 82vw); }
 }

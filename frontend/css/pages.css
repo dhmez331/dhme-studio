@@ -38,6 +38,12 @@
   margin-bottom: 12px;
 }
 
+.login-logo .brand-wordmark-login {
+  width: min(260px, 75vw);
+  height: auto;
+  margin: 0 auto 10px;
+}
+
 .login-logo h1 {
   font-size: 1.6rem;
   background: var(--accent-grad);
@@ -654,9 +660,14 @@
   .admin-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .login-logo .brand-wordmark-login {
+    width: min(220px, 78vw);
+  }
 }
 
 @media (max-width: 480px) {
   .tools-grid { grid-template-columns: 1fr 1fr; }
   .admin-grid { grid-template-columns: 1fr; }
+  .login-logo .brand-wordmark-login { width: min(190px, 82vw); }
 }
