@@ -214,6 +214,9 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   transition: background var(--transition), color var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 .brand-wordmark {
@@ -248,6 +251,7 @@ a:hover { opacity:0.8; }
   padding:24px;
   max-width:100%;
   transition:margin var(--transition);
+  overscroll-behavior-y: contain;
 }
 
 .gradient-text {
@@ -303,10 +307,18 @@ a:hover { opacity:0.8; }
 @keyframes loadFill { 0%{width:0%} 50%{width:70%} 100%{width:100%} }
 
 @media (max-width:768px) {
-  .main-content { margin-inline-start:0; padding:16px; padding-bottom:80px; }
+  .main-content {
+    margin-inline-start:0;
+    padding:56px 12px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
   .loading-logo .brand-wordmark { width: min(240px, 76vw); }
 }
 
 @media (max-width:480px) {
+  .main-content {
+    padding: 54px 10px 10px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
   .loading-logo .brand-wordmark { width: min(210px, 82vw); }
 }

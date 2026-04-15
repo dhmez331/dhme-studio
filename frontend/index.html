@@ -87,6 +87,9 @@
      MAIN APP
 ═══════════════════════════════════════════════════ -->
 <div id="app" class="app-layout" style="display:none;">
+  <button id="mobile-menu-btn" class="btn btn-secondary btn-icon" onclick="App.toggleMobileSidebar()"
+    title="فتح القائمة" aria-label="فتح القائمة">☰</button>
+  <div id="mobile-sidebar-overlay" onclick="App.closeMobileSidebar()"></div>
 
   <!-- ── Sidebar (Desktop) ───────────────────────── -->
   <aside class="sidebar" id="sidebar">
@@ -152,32 +155,6 @@
       </div>
     </div>
   </aside>
-
-  <!-- ── Bottom Nav (Mobile) ─────────────────────── -->
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
-      <div class="bottom-nav-item active" onclick="App.navigate('home')" data-page="home">
-        <span class="nav-icon">🏠</span>
-        <span data-translate="nav-home">الرئيسية</span>
-      </div>
-      <div class="bottom-nav-item" onclick="App.navigate('chat')" data-page="chat">
-        <span class="nav-icon">💬</span>
-        <span data-translate="nav-chat">محادثة</span>
-      </div>
-      <div class="bottom-nav-item" onclick="App.navigate('image')" data-page="image">
-        <span class="nav-icon">🖼️</span>
-        <span data-translate="nav-image">صور</span>
-      </div>
-      <div class="bottom-nav-item" onclick="App.navigate('voice')" data-page="voice">
-        <span class="nav-icon">🎤</span>
-        <span data-translate="nav-voice">صوت</span>
-      </div>
-      <div class="bottom-nav-item" onclick="App.navigate('settings')" data-page="settings">
-        <span class="nav-icon">⚙️</span>
-        <span data-translate="nav-settings">إعدادات</span>
-      </div>
-    </div>
-  </nav>
 
   <!-- ── Main Content ────────────────────────────── -->
   <main class="main-content" id="main-content">
