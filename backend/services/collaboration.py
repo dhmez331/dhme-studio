@@ -122,7 +122,7 @@ async def collaborate_image(
     mode: 'compete' = كل نموذج يولد صورته
           'collaborate' = نموذج نصي يحسّن البرومبت أولاً
     """
-    from services.huggingface import generate_image
+    from services.image_gateway import generate_image_with_fallback, classify_error
     from services.gemini import gemini_chat
 
     final_prompt = prompt
@@ -139,48 +139,64 @@ async def collaborate_image(
 
     if mode == "compete":
         # كل نموذج يولد صورته
-        results = {}
+        errors = {}
 
         async def gen_flux_schnell():
             try:
-                img = await generate_image(final_prompt, "flux_schnell")
-                return "FLUX.1 Schnell", img
+                img, provider, _ = await generate_image_with_fallback(final_prompt, "flux_schnell")
+                return "FLUX.1 Schnell", img, provider, None
             except Exception as e:
-                return "FLUX.1 Schnell", None
+                return "FLUX.1 Schnell", None, None, str(e)
 
         async def gen_flux_dev():
             try:
-                img = await generate_image(final_prompt, "flux_dev")
-                return "FLUX.1 Dev", img
+                img, provider, _ = await generate_image_with_fallback(final_prompt, "flux_dev")
+                return "FLUX.1 Dev", img, provider, None
             except Exception as e:
-                return "FLUX.1 Dev", None
+                return "FLUX.1 Dev", None, None, str(e)
 
         async def gen_sdxl():
             try:
-                img = await generate_image(final_prompt, "sdxl")
-                return "Stable Diffusion XL", img
+                img, provider, _ = await generate_image_with_fallback(final_prompt, "sdxl")
+                return "Stable Diffusion XL", img, provider, None
             except Exception as e:
-                return "Stable Diffusion XL", None
+                return "Stable Diffusion XL", None, None, str(e)
 
         tasks = [gen_flux_schnell(), gen_flux_dev(), gen_sdxl()]
         responses = await asyncio.gather(*tasks)
+        images = {}
+        providers = {}
+        for name, img, provider, err in responses:
+            if img:
+                images[name] = img
+                providers[name] = provider
+                continue
+            if err:
+                errors[name] = {
+                    "type": classify_error(err),
+                    "error": err,
+                }
 
         return {
             "mode": "compete",
             "enhanced_prompt": final_prompt,
             "original_prompt": prompt,
-            "images": {name: img for name, img in responses if img}
+            "images": images,
+            "providers": providers,
+            "errors": errors,
         }
 
     elif mode == "collaborate":
         # Gemini يحسّن البرومبت + FLUX يولد الصورة النهائية
         try:
-            img = await generate_image(final_prompt, "flux_dev")
+            img, provider, attempts = await generate_image_with_fallback(final_prompt, "flux_dev")
             return {
                 "mode": "collaborate",
                 "enhanced_prompt": final_prompt,
                 "original_prompt": prompt,
-                "image": img
+                "image": img,
+                "provider": provider,
+                "attempts": attempts,
             }
         except Exception as e:
             raise Exception(f"Collaborate image error: {str(e)}")

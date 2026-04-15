@@ -326,7 +326,12 @@ const App = {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'حدث خطأ' }));
-      throw new Error(err.detail || 'حدث خطأ');
+      const detail = err?.detail;
+      if (detail && typeof detail === 'object') {
+        const type = detail.type ? `[${detail.type}] ` : '';
+        throw new Error(`${type}${detail.message || 'حدث خطأ'}`);
+      }
+      throw new Error(detail || err?.message || 'حدث خطأ');
     }
 
     return res;
